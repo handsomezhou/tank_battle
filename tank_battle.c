@@ -125,14 +125,16 @@ static int init_screen(screen_t *screen)
 	wrefresh(scr->win);
 	keypad(scr->win,TRUE);
 	nodelay(stdscr,TRUE);
-
+#if 0
 	//just for test
 	nodelay(stdscr,FALSE);
 	box(stdscr,0,0);
 	wrefresh(stdscr);
-	wgetch(stdscr);
+	int ch=wgetch(stdscr);
+	mvwprintw(stdscr,1,1,"%d",ch);
+	ch=wgetch(stdscr);
 	nodelay(stdscr,TRUE);
-	
+#endif
 	return TB_SUCCESS;
 }
 

@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 
 	while(1){
 		paint_tank_battle(tank_battle);
+		
 		usleep(1000*1000);
 	}
 	
