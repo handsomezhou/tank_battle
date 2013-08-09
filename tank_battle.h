@@ -38,8 +38,22 @@
 
 #define HP_TANK		5
 #define HP_BULLET	1
-#define HP_BARRIER	0
+#define HP_BARRIER	5
 
+#define MAX_TANK_Y		(TANK_DECK_HEIGHT-3-1)
+#define MAX_TANK_X		(TANK_DECK_WIDTH-3-1)
+#define MIN_TANK_Y		1
+#define MIN_TANK_X		1
+
+#define MAX_BULLET_Y	(TANK_DECK_HEIGHT-2)	
+#define MAX_BULLET_X	(TANK_DECK_WIDTH-2)
+#define MIN_BULLET_Y	1
+#define MIN_BULLET_X	1
+
+#define MAX_BARRIER_Y	(TANK_DECK_HEIGHT-2-1)
+#define MAX_BARRIER_X	(TANK_DECK_WIDTH-2-1)
+#define MIN_BARRIER_Y	2
+#define MIN_BARRIER_X	2
 
 #define PAINT_TANK		'*'
 #define PAINT_BULLTE	'*'

@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include "tank_battle.h"
+#include "handle_tank_battle.h"
 
 #if 0
 char tank_model[TANK_MODEL_NUM][TANK_HEIGHT][TANK_WIDTH]=
@@ -66,6 +67,70 @@ int init_tank_battle(tank_battle_t **tank_battle)
 			break;
 		}
 
+		//just for test
+		//1<=x<<TANK_DECK_WIDTH-3, 1<=TANK_DECK_HEIGHT-4
+
+		coordinate_t coordinate={.y=1+1,.x=1+1};
+#if 1
+
+		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
+
+		coordinate.y=TANK_DECK_HEIGHT-3-1;
+		coordinate.x=1;
+		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
+
+		coordinate.y=1;
+		coordinate.x=TANK_DECK_WIDTH-3-1;
+		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
+
+
+		coordinate.y=TANK_DECK_HEIGHT-3-1;
+		coordinate.x=TANK_DECK_WIDTH-3-1;
+		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
+#endif
+		coordinate.y=1;
+		coordinate.x=1;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		coordinate.y=1;
+		coordinate.x=TANK_DECK_WIDTH-2;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		coordinate.y=TANK_DECK_HEIGHT-2;
+		coordinate.x=1;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		coordinate.y=9;
+		coordinate.x=8;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		coordinate.y=8;
+		coordinate.x=8;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		coordinate.y=TANK_DECK_HEIGHT-2;
+		coordinate.x=TANK_DECK_WIDTH-2;
+		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+
+		coordinate.y=2;
+		coordinate.x=2;
+		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+
+		coordinate.y=2;
+		coordinate.x=TANK_DECK_WIDTH-2-1;
+		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+
+		coordinate.y=TANK_DECK_HEIGHT-2-1;
+		coordinate.x=2;
+		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+
+		coordinate.y=TANK_DECK_HEIGHT-2-1;
+		coordinate.x=TANK_DECK_WIDTH-2-1;
+		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+#if 1
+		int n=30;
+		dir_t dir;
+		while(n--){
+			 new_object_pos(&coordinate,NULL,OBJECT_BARRIER,*tb);
+			 add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+			 //add_barrier(coordinate,tb->barrier);
+		}
+#endif
 		return TB_SUCCESS;
 	}while(0);
 	

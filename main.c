@@ -3,6 +3,8 @@
   */
 
 #include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 #include <pthread.h>
 #include "tank_battle.h"
 #include "input_tank_battle.h"
@@ -14,6 +16,7 @@ int main(int argc, char *argv[])
 	tank_battle_t *tank_battle=NULL;
 	int ret=TB_FAILED;
 
+	srand((unsigned int)(time(NULL)));
 	ret=init_tank_battle(&tank_battle);
 	if(TB_FAILED==ret){
 		exit_tank_battle(tank_battle);
