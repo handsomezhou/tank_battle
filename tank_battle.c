@@ -46,7 +46,7 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		exit_tank_battle(*tb);
 		*tb=NULL;
 	}
-
+	int i=0;
 	*tb=(tank_battle_t *)malloc(sizeof(tank_battle_t));
 	do{
 		if(NULL==*tb){
@@ -55,6 +55,10 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		(*tb)->tank=NULL;
 		(*tb)->bullet=NULL;
 		(*tb)->barrier=NULL;
+		for(i=0; i<MANUAL_TANK_NUM; i++){
+			(*tb)->manual_tank[i]=FALSE;
+		}
+		
 		(*tb)->side_blue=TANK_BLUE_NUM;
 		(*tb)->side_green=TANK_GREEN_NUM;
 		(*tb)->speed=SPEED_DELAY_TIME;
@@ -71,65 +75,114 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		//1<=x<<TANK_DECK_WIDTH-3, 1<=TANK_DECK_HEIGHT-4
 
 		coordinate_t coordinate={.y=1+1,.x=1+1};
-#if 1
+#if 0
 
-		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
+		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
 
 		coordinate.y=TANK_DECK_HEIGHT-3-1;
 		coordinate.x=1;
-		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
+		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
 
 		coordinate.y=1;
 		coordinate.x=TANK_DECK_WIDTH-3-1;
-		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
+		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
 
 
 		coordinate.y=TANK_DECK_HEIGHT-3-1;
 		coordinate.x=TANK_DECK_WIDTH-3-1;
-		add_object_type(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
+		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
 #endif
+		int number=0;
 		coordinate.y=1;
 		coordinate.x=1;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=1;
 		coordinate.x=TANK_DECK_WIDTH-2;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=TANK_DECK_HEIGHT-2;
 		coordinate.x=1;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=9;
 		coordinate.x=8;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_GREEN,number,(*tb)->bullet);
 		coordinate.y=8;
 		coordinate.x=8;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_GREEN,number,(*tb)->bullet);
 		coordinate.y=TANK_DECK_HEIGHT-2;
 		coordinate.x=TANK_DECK_WIDTH-2;
-		add_object_type(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,(*tb)->bullet);
-
+		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
+#if 0
 		coordinate.y=2;
 		coordinate.x=2;
-		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
 
 		coordinate.y=2;
 		coordinate.x=TANK_DECK_WIDTH-2-1;
-		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
 
 		coordinate.y=TANK_DECK_HEIGHT-2-1;
 		coordinate.x=2;
-		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
 
 		coordinate.y=TANK_DECK_HEIGHT-2-1;
 		coordinate.x=TANK_DECK_WIDTH-2-1;
-		add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+#endif
 #if 1
-		int n=30;
+		int n;
 		dir_t dir;
+#if 0
+		coordinate.y=8;
+		coordinate.x=8;
+	    add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+		coordinate.y=8;
+		coordinate.x=9;
+        add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+	 	coordinate.y=9;
+		coordinate.x=8;
+		 add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+#endif
+		n=10;
 		while(n--){
 			 new_object_pos(&coordinate,NULL,OBJECT_BARRIER,*tb);
-			 add_object_type(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
+			 add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,number,(*tb)->barrier);
 			 //add_barrier(coordinate,tb->barrier);
 		}
+		n=5;
+		while(n){
+			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
+			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,number,(*tb)->tank);
+			n--;
+		}
+		n=5;
+		while(n){
+			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
+			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,number,(*tb)->tank);
+			n--;
+		}
+		n=6;
+		number=0;
+		while(n){
+			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
+			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,--number,(*tb)->tank);
+			n--;
+		}
+		
+#if 0
+
+			coordinate.y=9;
+			coordinate.x=10;
+			dir=DIR_RIGHT;
+			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,(*tb)->tank);
+			//new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
+			coordinate.y=13;
+			coordinate.x=12;
+			dir=DIR_DOWN;
+			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,(*tb)->tank);
+			
+			n--;
+		//}
+#endif
 #endif
 		return TB_SUCCESS;
 	}while(0);
@@ -172,12 +225,23 @@ static int init_screen(screen_t *screen)
 	if(has_colors()){
 		start_color();
 
-		init_pair(COLOR_SCREEN,COLOR_BLACK,COLOR_BLACK);
+		init_pair(COLOR_SCREEN,COLOR_MAGENTA,COLOR_BLACK);
+
 		init_pair(COLOR_TANK_BLUE,COLOR_BLUE,COLOR_BLACK);
 		init_pair(COLOR_TANK_GREEN,COLOR_GREEN,COLOR_BLACK);
+		init_pair(COLOR_TANK_GREEN1,COLOR_YELLOW,COLOR_BLACK);
+		init_pair(COLOR_TANK_GREEN2,COLOR_MAGENTA,COLOR_BLACK);
+		init_pair(COLOR_TANK_GREEN3,COLOR_WHITE,COLOR_BLACK);
+		
+		
 		init_pair(COLOR_BULLET_BLUE,COLOR_BLUE,COLOR_BLACK);
 		init_pair(COLOR_BULLET_GREEN,COLOR_GREEN,COLOR_BLACK);
+		init_pair(COLOR_BULLET_GREEN1,COLOR_YELLOW,COLOR_BLACK);
+		init_pair(COLOR_BULLET_GREEN2,COLOR_MAGENTA,COLOR_BLACK);
+		init_pair(COLOR_BULLET_GREEN3,COLOR_WHITE,COLOR_BLACK);
+
 		init_pair(COLOR_BARRIER,COLOR_YELLOW,COLOR_BLACK);
+
 		init_pair(COLOR_NORMAL_PROMPT,COLOR_GREEN,COLOR_BLACK);
 		init_pair(COLOR_ERROR_PROMPT,COLOR_RED,COLOR_WHITE);
 	}
@@ -236,6 +300,7 @@ static object_type_t *init_object_type(object_type_t **obj_type, object_t object
 		(*obj_type)->dir=DIR_NONE;
 		(*obj_type)->standpoint=STANDPOINT_WHITE;
 		(*obj_type)->hp=0;
+		(*obj_type)->number=NUMBER;
 		(*obj_type)->canmove=FALSE;
 		(*obj_type)->next=NULL;
 	}while(0);

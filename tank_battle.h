@@ -40,6 +40,8 @@
 #define HP_BULLET	1
 #define HP_BARRIER	5
 
+#define NUMBER		0
+
 #define MAX_TANK_Y		(TANK_DECK_HEIGHT-3-1)
 #define MAX_TANK_X		(TANK_DECK_WIDTH-3-1)
 #define MIN_TANK_Y		1
@@ -55,11 +57,26 @@
 #define MIN_BARRIER_Y	2
 #define MIN_BARRIER_X	2
 
+#define NUMBER_TANK_GREEN1		(-1)
+#define NUMBER_TANK_GREEN2		(-2)
+#define NUMBER_TANK_GREEN3		(-3)
+#define NUMBER_BULLTE_GREEN1	(-1)
+#define NUMBER_BULLTE_GREEN2	(-2)
+#define NUMBER_BULLTE_GREEN3	(-3)
+
 #define PAINT_TANK		'*'
 #define PAINT_BULLTE	'*'
 #define PAINT_BARRIER	'*'	
 
+#define MANUAL_TANK_NUM		3
 #define SPEED_DELAY_TIME (500*1000)	//500ms
+
+#define KEY_ESC  			27
+
+#if 0	//just for test
+#define TIME_MIN_UNIT	100000 //us
+#define TIME_MAX_DELAY	1200000 //us
+#endif 
 
 #define TRUE 	1
 #define FALSE	0
@@ -67,11 +84,21 @@ typedef int BOOL;
 
 enum color{
 	COLOR_SCREEN=1,
+		
 	COLOR_TANK_BLUE,
 	COLOR_TANK_GREEN,
+	COLOR_TANK_GREEN1,//Manual control (GREEN1~GREEN3)
+	COLOR_TANK_GREEN2,
+	COLOR_TANK_GREEN3,
+	
 	COLOR_BULLET_BLUE,
 	COLOR_BULLET_GREEN,
+	COLOR_BULLET_GREEN1,//Manual control (GREEN1~GREEN3)
+	COLOR_BULLET_GREEN2,
+	COLOR_BULLET_GREEN3,
+	
 	COLOR_BARRIER,
+	
 	COLOR_NORMAL_PROMPT,
 	COLOR_ERROR_PROMPT,
 };
@@ -121,6 +148,7 @@ typedef struct object_type{
 	dir_t dir;
 	standpoint_t standpoint;
 	int hp;				//Hit Point Health Points
+	int number;			//Object No.
 	BOOL canmove;		//Judge whether the object can move
 	struct object_type *next;
 }object_type_t;
@@ -137,6 +165,7 @@ typedef struct tank_battle{
 	object_type_t *tank;	//The head pointer points to tank
 	object_type_t *bullet;	//The head pointer points to bullet
 	object_type_t *barrier;	//The head pointer points to barrier
+	BOOL manual_tank[MANUAL_TANK_NUM];//manual tank(which number is NUMBER_TANK_GREEN1 to NUMBER_TANK_GREEN3)
 	int side_blue;			//Blue side of tank number
 	int side_green;			//Green side of tank number
 	int speed;				//the move speed of the tank

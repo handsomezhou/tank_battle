@@ -3,8 +3,8 @@
   */
 
 #include "output_tank_battle.h"
-static void open_colors(object_t object,standpoint_t standpoint);
-static void close_colors(object_t object,standpoint_t standpoint);
+static void open_colors(object_t object,standpoint_t standpoint,int number);
+static void close_colors(object_t object,standpoint_t standpoint,int number);
 static void draw_screen(screen_t *screen);
 static void clear_screen(screen_t *screen);
 static void draw_tank(object_type_t *tank,const screen_t *screen);
@@ -45,7 +45,7 @@ void paint_tank_battle(tank_battle_t *tank_battle)
 	return ;
 }
 
-static void open_colors(object_t object,standpoint_t standpoint)
+static void open_colors(object_t object,standpoint_t standpoint,int number)
 {
 	switch(object){
 		case OBJECT_TANK:
@@ -54,7 +54,20 @@ static void open_colors(object_t object,standpoint_t standpoint)
 					if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_BLUE)|A_BOLD);}
 					break;
 				case STANDPOINT_GREEN:
-					if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
+					switch(number){
+						case NUMBER_TANK_GREEN1:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN1)|A_BOLD);}
+							break;
+						case NUMBER_TANK_GREEN2:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN2)|A_BOLD);}
+							break;
+						case NUMBER_TANK_GREEN3:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
+							break;
+					}
 					break;
 				default:
 					break;
@@ -67,7 +80,20 @@ static void open_colors(object_t object,standpoint_t standpoint)
 					if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_BLUE)|A_BOLD);}
 					break;
 				case STANDPOINT_GREEN:
-					if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
+					switch(number){
+						case NUMBER_BULLTE_GREEN1:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN1)|A_BOLD);}
+							break;
+						case NUMBER_BULLTE_GREEN2:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN2)|A_BOLD);}
+							break;
+						case NUMBER_BULLTE_GREEN3:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
+							break;
+					}
 					break;
 				default:
 					break;
@@ -90,7 +116,7 @@ static void open_colors(object_t object,standpoint_t standpoint)
 	return;
 }
 
-static void close_colors(object_t object, standpoint_t standpoint)
+static void close_colors(object_t object, standpoint_t standpoint,int number)
 {
 		switch(object){
 		case OBJECT_TANK:
@@ -99,7 +125,20 @@ static void close_colors(object_t object, standpoint_t standpoint)
 					if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_BLUE)|A_BOLD);}
 					break;
 				case STANDPOINT_GREEN:
-					if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
+					switch(number){
+						case NUMBER_TANK_GREEN1:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN1)|A_BOLD);}
+							break;
+						case NUMBER_TANK_GREEN2:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN2)|A_BOLD);}
+							break;
+						case NUMBER_TANK_GREEN3:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
+							break;
+					}
 					break;
 				default:
 					break;
@@ -112,7 +151,21 @@ static void close_colors(object_t object, standpoint_t standpoint)
 					if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_BLUE)|A_BOLD);}
 					break;
 				case STANDPOINT_GREEN:
-					if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
+					switch(number){
+						case NUMBER_BULLTE_GREEN1:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN1)|A_BOLD);}
+							break;
+						case NUMBER_BULLTE_GREEN2:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN2)|A_BOLD);}
+							break;
+						case NUMBER_BULLTE_GREEN3:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
+							break;
+						
+					}
 					break;
 				default:
 					break;
@@ -148,6 +201,7 @@ static void draw_screen(screen_t *screen)
 	scr->begin_y=(scr_y-scr->nlines)/2;
 	scr->begin_x=(scr_x-scr->ncols)/2;
 
+	if(has_colors()){attron(COLOR_PAIR(COLOR_SCREEN)|A_BOLD);}
 	for(y=scr->begin_y; y<scr->begin_y+scr->nlines; y++){
 		for(x=scr->begin_x; x<scr->begin_x+scr->ncols; x++){
 			if(y==scr->begin_y||y==scr->begin_y+scr->nlines-1||x==scr->begin_x||x==scr->begin_x+TANK_DECK_WIDTH-1||x==scr->begin_x+scr->ncols-1){
@@ -155,6 +209,7 @@ static void draw_screen(screen_t *screen)
 			}
 		}
 	}
+	if(has_colors()){attroff(COLOR_PAIR(COLOR_SCREEN)|A_BOLD);}
 	wrefresh(scr->win);	
 	
 	return ;
@@ -183,8 +238,9 @@ static void draw_tank(object_type_t *tank,const screen_t *screen)
 	int y=0;
 	int z=0;
 	object_type_t *cur=ot->next;
+	int number=0;
 	while(NULL!=cur){
-		open_colors(cur->object,cur->standpoint);
+		open_colors(cur->object,cur->standpoint,cur->number);
 		for(y=scr->begin_y+cur->coordinate.y; y<scr->begin_y+cur->coordinate.y+cur->size.h; y++){
 			for(x=scr->begin_x+cur->coordinate.x; x<scr->begin_x+cur->coordinate.x+cur->size.w; x++){
 				if((y==scr->begin_y+cur->coordinate.y+tk_model[cur->dir][z].y_off&&x==scr->begin_x+cur->coordinate.x+tk_model[cur->dir][z].x_off)||\
@@ -195,7 +251,7 @@ static void draw_tank(object_type_t *tank,const screen_t *screen)
 				}
 			}
 		}	
-		close_colors(cur->object,cur->standpoint);
+		close_colors(cur->object,cur->standpoint,cur->number);
 		
 		cur=cur->next;
 	}
@@ -214,9 +270,9 @@ static void draw_bullet(object_type_t *bullet,const screen_t *screen)
 
 	object_type_t *cur=ot->next;
 	while(NULL!=cur){
-		open_colors(cur->object,cur->standpoint);
+		open_colors(cur->object,cur->standpoint,cur->number);
 		mvwaddch(scr->win,scr->begin_y+cur->coordinate.y,scr->begin_x+cur->coordinate.x,PAINT_BULLTE);
-		close_colors(cur->object,cur->standpoint);
+		close_colors(cur->object,cur->standpoint,cur->number);
 
 		cur=cur->next;
 	}
