@@ -2,7 +2,9 @@
   *  Copyright (C) 2013  Handsome Zhou
   */
 
+#include <unistd.h>
 #include "input_tank_battle.h"
+#include "handle_tank_battle.h"
 
 void *input_tank_battle(void *arg)
 {
@@ -11,6 +13,7 @@ void *input_tank_battle(void *arg)
 		return tb;
 	}
 	int ch=-1;
+	BOOL rotate=FALSE;
 	object_type_t *tk1=NULL;
 	object_type_t *tk2=NULL;
 	object_type_t *tk3=NULL;
@@ -46,19 +49,52 @@ void *input_tank_battle(void *arg)
 						switch(ch){
 							case 'w':
 							case 'W':
-								tk1->coordinate.y--;
+								if(DIR_UP==tk1->dir){
+									tk1->coordinate.y--;
+								}else{
+									rotate=can_rotate_direction(DIR_UP,tk1,tb);
+									if(TRUE==rotate){
+										rotate_direction(DIR_UP,tk1);
+										tk1->canmove=TRUE;
+									}
+								}
 								break;
 							case 'a':
 							case 'A':
-								tk1->coordinate.x--;
+								if(DIR_LEFT==tk1->dir){
+									tk1->coordinate.x--;
+								}else{
+									rotate=can_rotate_direction(DIR_LEFT,tk1,tb);
+									if(TRUE==rotate){
+										rotate_direction(DIR_LEFT,tk1);
+										tk1->canmove=TRUE;
+									}
+								}
 								break;
 							case 's':
 							case 'S':
-								tk1->coordinate.y++;
+								if(DIR_DOWN==tk1->dir){
+									tk1->coordinate.y++;
+								}else{
+									rotate=can_rotate_direction(DIR_DOWN,tk1,tb);
+									if(TRUE==rotate){
+										rotate_direction(DIR_DOWN,tk1);
+										tk1->canmove=TRUE;
+									}
+								}
+								
 								break;
 							case 'd':
 							case 'D':
-								tk1->coordinate.x++;
+								if(DIR_RIGHT==tk1->dir){
+									tk1->coordinate.x++;
+								}else{
+									rotate=can_rotate_direction(DIR_RIGHT,tk1,tb);
+									if(TRUE==rotate){
+										rotate_direction(DIR_RIGHT,tk1);
+										tk1->canmove=TRUE;
+									}
+								}
 								break;
 							case 'e':
 							case 'E':

@@ -182,5 +182,11 @@ extern tank_model_t tk_model[TANK_MODEL_NUM][TANK_SPACE_NUM];
 int init_tank_battle(tank_battle_t **tank_battle);
 void exit_tank_battle(tank_battle_t *tank_battle);
 
+
+//basic function
+coordinate_t *coordinate_copy(coordinate_t *dest,const coordinate_t *src);
+siz_t *size_copy(siz_t *dest,const siz_t *src);
+
+
 #endif	/*TANK_BATTLE_H*/
 

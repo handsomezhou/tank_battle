@@ -30,9 +30,14 @@ static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *
 
 //tank:Moved after the first judgment
 static object_type_t *move_tank(object_type_t *tank);
-
+BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
+object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
 //bullet:First move after the judge
 static object_type_t *move_all_bullet(object_type_t *bullet);
+static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle);
+static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *tank,tank_battle_t *tank_battle);
+static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *all_bullet);
+static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *barrier);
 
 int handle_tank_battle(tank_battle_t *tank_battle)
 {
@@ -45,10 +50,17 @@ int handle_tank_battle(tank_battle_t *tank_battle)
 		if(NULL==tb->bullet||NULL==tb->tank){
 			break;
 		}
-		//about bullet event
-		move_all_bullet(tb->bullet);
+		//deal bullet event
+		object_type_t *bt=NULL;
+		bt=move_all_bullet(tb->bullet);
+		if(NULL!=bt){
+			deal_bullet_collision(tb->bullet,tb);
+		}else{//just for test
+			mvwprintw(stdscr,1,1,"%s","hihi");
+			wrefresh(stdscr);
+		}
 		
-		//about tank event
+		//deal tank event
 		
 		
 	}while(0);
@@ -678,6 +690,59 @@ static object_type_t *move_tank(object_type_t *tank)
 	return ot;
 }
 
+BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle)
+{
+	dir_t dir=direction;
+	object_type_t *tk=tank;
+	tank_battle_t *tb=tank_battle;
+	object_type_t *cur=NULL;
+	object_type_t *ret=NULL;
+	object_type_t tmp;
+	BOOL flag=FALSE;
+	do{
+		if(NULL==tk||NULL==tb){
+			break;
+		}
+
+		if(NULL==tb->tank){
+			break;
+		}
+
+		if(dir==tk->dir){
+			break;
+		}
+		tmp.dir=dir;
+		coordinate_copy(&tmp.coordinate,&tk->coordinate);
+		size_copy(&tmp.size,&tk->size);
+		flag=TRUE;
+		cur=tb->tank->next;
+		while(NULL!=cur){
+			if(tk!=cur){
+				ret=tank_on_tank(&tmp,cur);
+				if(NULL!=ret){
+					flag=FALSE;
+					break;
+				}
+			}
+			cur=cur->next;
+		}
+	}while(0);
+		
+	return flag;
+}
+
+object_type_t *rotate_direction(dir_t direction,object_type_t *tank)
+{
+	object_type_t *tk=tank;
+	if(NULL==tk){
+		return tk;
+	}
+
+	tk->dir=direction;
+
+	return tk;
+}
+
 static object_type_t *move_all_bullet(object_type_t *bullet)
 {
 	object_type_t *ot=bullet;
@@ -709,4 +774,125 @@ static object_type_t *move_all_bullet(object_type_t *bullet)
 	return ot->next;
 }
 
+static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle)
+{
+	object_type_t *bt=bullet;
+	tank_battle_t *tb=tank_battle;
+	object_type_t *prev=NULL;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+	BOOL flag;
+
+	do{
+		if(NULL==bt||NULL==tb){
+			break;
+		}
+
+		cur=bt->next;
+		prev=bt;
+		while(NULL!=cur){
+			flag=is_out_bounds(cur);
+			if(TRUE==flag){
+				del_object_type(cur,bt);
+				cur=prev->next;
+				continue;
+			}
+
+			tmp=deal_bullet_to_tank(cur,tb->tank,tb);
+			if(NULL!=tmp){
+				del_object_type(cur,bt);
+				cur=prev->next;
+				continue;
+			}
+
+			tmp=deal_bullet_to_barrier(cur,tb->barrier);
+			if(NULL!=tmp){
+				del_object_type(cur,bt);
+				cur=prev->next;
+				continue;
+			}
+			
+			prev=cur;
+			cur=cur->next;
+		}
+	}while(0);
+	
+	return cur;
+}
+
+static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *tank,tank_battle_t *tank_battle)
+{
+	tank_battle_t *tb=tank_battle;
+	object_type_t *bt=bullet;
+	object_type_t *tk=tank;
+	object_type_t *prev=NULL;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+	standpoint_t sp;
+
+	do{
+		if(NULL==bt||NULL==tk||NULL==tb){
+			break;
+		}
+		prev=tk;
+		cur=tk->next;
+		while(NULL!=cur){
+			tmp=bullet_on_tank(bt,cur);
+			if(NULL!=tmp){
+				if(bt->standpoint!=cur->standpoint){
+					cur->hp--;
+					if(cur->hp<=0){
+						prev->next=cur->next;
+						sp=cur->standpoint;
+						del_object_type(cur,tk);
+						if(STANDPOINT_BLUE==sp){
+							tb->side_blue--;
+							if(tb->side_blue<=0){
+								tb->status=STATUS_QUIT;
+							}
+						}else if(STANDPOINT_GREEN==sp){
+							tb->side_green--;
+							if(tb->side_green<=0){
+								tb->status=STATUS_QUIT;
+							}
+						}
+					}	
+				}
+				break;
+			}
+			prev=cur;
+			cur=cur->next;
+		}
+	}while(0);
+	
+	return tmp;
+}
+
+static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *all_bullet)
+{
+	return NULL;
+}
+
+static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *barrier)
+{
+	object_type_t *bt=bullet;
+	object_type_t *br=barrier;
+	object_type_t *cur=NULL;
+
+	do{
+		if(NULL==bt||NULL==br){
+			break;
+		}
+		cur=br->next;
+		while(NULL!=cur){
+			if(bt->coordinate.y==cur->coordinate.y&&bt->coordinate.x==cur->coordinate.x){
+				cur=bt;
+				break;
+			}
+			cur=cur->next;
+		}
+	}while(0);
+	
+	return cur;
+}
 

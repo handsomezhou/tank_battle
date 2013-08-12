@@ -8,7 +8,29 @@
 #include "tank_battle.h"
 
 int handle_tank_battle(tank_battle_t *tank_battle);
+/**
+*@brief	Determine the new tank or barrier location
+*@param [in/out] coordinate:Get coordinate of the new object
+*@param [in/out] dir:Get dir of the new object
+*@param [in] object:Depending on the object type judgment is  tank or barrier
+*@param [in] tank_battle:Determine whether the new position and tank_battle conflict
+*@return TRUE/FALSE
+*@author handsomezhou  
+*@date 2013-08-12
+*/
 BOOL new_object_pos(coordinate_t *coordinate, dir_t *dir,object_t object,const tank_battle_t *tank_battle);
+/**
+*@brief	Add new object(tank,bullet or barrier)
+*@param [in] coordinate:The added object coordinate
+*@param [in] object:The added object type(tank,bullet or barrier)
+*@param [in] dir:The added object direction
+*@param [in] standpoint:The added object standpoint
+*@param [in] number:The added number,only used to distinguish between manual tank
+*@param [in] tank_battle:Add a new object to the corresponding object list
+*@return The address of added object
+*@author handsomezhou  
+*@date 2013-08-12
+*/
 object_type_t *add_object(coordinate_t coordinate,object_t object,dir_t dir,standpoint_t standpoint,int number,object_type_t *object_type);
 object_type_t *fire(object_type_t *tank,object_type_t *bullet);
 

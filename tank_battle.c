@@ -95,19 +95,19 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		int number=0;
 		coordinate.y=1;
 		coordinate.x=1;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_RIGHT,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=1;
-		coordinate.x=TANK_DECK_WIDTH-2;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
+		coordinate.x=8;
+		add_object(coordinate,OBJECT_BULLET,DIR_DOWN,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=TANK_DECK_HEIGHT-2;
 		coordinate.x=1;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_RIGHT,STANDPOINT_BLUE,number,(*tb)->bullet);
 		coordinate.y=9;
 		coordinate.x=8;
 		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_GREEN,number,(*tb)->bullet);
 		coordinate.y=8;
 		coordinate.x=8;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_GREEN,number,(*tb)->bullet);
+		add_object(coordinate,OBJECT_BULLET,DIR_LEFT,STANDPOINT_GREEN,number,(*tb)->bullet);
 		coordinate.y=TANK_DECK_HEIGHT-2;
 		coordinate.x=TANK_DECK_WIDTH-2;
 		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
@@ -324,4 +324,36 @@ static void exit_object_type(object_type_t *object_type)
 	return ;
 }
 
+coordinate_t *coordinate_copy(coordinate_t *dest,const coordinate_t *src)
+{
+	if(NULL==dest){
+		return dest;
+	}
+
+	if(NULL==src){
+		dest->y=0;
+		dest->x=0;
+	}else{
+		dest->y=src->y;
+		dest->x=src->x;
+	}
+	
+	return dest;	
+}
+siz_t *size_copy(siz_t *dest,const siz_t *src)
+{
+	if(NULL==dest){
+		return dest;
+	}
+
+	if(NULL==src){
+		dest->h=0;
+		dest->w=0;
+	}else{
+		dest->h=src->h;
+		dest->w=src->w;
+	}
+
+	return dest;
+}
 
