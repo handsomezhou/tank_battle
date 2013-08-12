@@ -179,7 +179,22 @@ typedef struct tank_model{
 
 extern tank_model_t tk_model[TANK_MODEL_NUM][TANK_SPACE_NUM];
 
+/**
+ *@brief Init tank battle 
+ *@param [in/out] tank_battle:Pass resources parameters
+ *@return TB_SUCCESS/TB_FAILED 
+ *@author handsomezhou  
+ *@date 2013-08-12
+ */
 int init_tank_battle(tank_battle_t **tank_battle);
+
+/**
+ *@brief Release tank battle resources
+ *@param [in/out] tank_battle:Pass resources parameters
+ *@return TB_SUCCESS/TB_FAILED 
+ *@author handsomezhou  
+ *@date 2013-08-12
+ */
 void exit_tank_battle(tank_battle_t *tank_battle);
 
 
