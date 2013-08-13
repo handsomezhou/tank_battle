@@ -617,13 +617,10 @@ static object_type_t *barrier_on_tank(object_type_t *barrier,object_type_t *tank
 
 static object_type_t *bullet_on_bullet(object_type_t *bullet1,object_type_t *bullet2)
 {
-//just for test
-#if 0
-//因为是bullet全部移动之后再处理bullet 与bullet 碰撞,
-	//所以既要处理移动之后bullet 坐标相同情况的碰撞,
-	//也要处理坐标相邻想对方向的碰撞情况
-
-#endif
+	/*
+	 *Move all bullet before deal bullet collision ,Not only need we to deal with the same coordinates bullet collision,
+	 *but also we need to deal  with Moving towards each other but different coordinate collision case.
+	 */
 	object_type_t *bt1=bullet1;
 	object_type_t *bt2=bullet2;
 	object_type_t *ot=NULL; 
