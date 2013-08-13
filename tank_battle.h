@@ -69,7 +69,7 @@
 #define PAINT_BARRIER	'*'	
 
 #define MANUAL_TANK_NUM		3
-#define SPEED_DELAY_TIME (500*1000)	//500ms
+#define SPEED_DELAY_TIME (50*1000)	//500ms
 
 #define KEY_ESC  			27
 

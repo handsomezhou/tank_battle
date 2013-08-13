@@ -32,6 +32,8 @@ static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *
 static object_type_t *move_tank(object_type_t *tank);
 BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
 object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
+static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle);
+
 //bullet:First move after the judge
 static object_type_t *move_all_bullet(object_type_t *bullet);
 static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle);
@@ -61,6 +63,8 @@ int handle_tank_battle(tank_battle_t *tank_battle)
 		}
 		
 		//deal tank event
+		deal_tank_collision(tb->tank,tb);
+		
 		
 		
 	}while(0);
@@ -613,7 +617,57 @@ static object_type_t *barrier_on_tank(object_type_t *barrier,object_type_t *tank
 
 static object_type_t *bullet_on_bullet(object_type_t *bullet1,object_type_t *bullet2)
 {
-	return NULL;
+//just for test
+#if 0
+//因为是bullet全部移动之后再处理bullet 与bullet 碰撞,
+	//所以既要处理移动之后bullet 坐标相同情况的碰撞,
+	//也要处理坐标相邻想对方向的碰撞情况
+
+#endif
+	object_type_t *bt1=bullet1;
+	object_type_t *bt2=bullet2;
+	object_type_t *ot=NULL; 
+	
+	do{
+		if(NULL==bt1||NULL==bt2){
+			break;
+		}
+
+		if(bt1->coordinate.x==bt2->coordinate.x&&bt1->coordinate.y==bt2->coordinate.y){
+			ot=bt1;
+			break;
+		}
+
+		if(fabs(bt1->coordinate.x-bt2->coordinate.x)==1&&bt1->coordinate.y-bt2->coordinate.y==0){
+			if(bt1->coordinate.x-bt2->coordinate.x==1){
+				if(bt1->dir==DIR_RIGHT&&bt2->dir==DIR_LEFT){
+					ot=bt1;
+					break;
+				}
+			}else{
+				if(bt1->dir==DIR_LEFT&&bt2->dir==DIR_RIGHT){
+					ot=bt1;
+					break;
+				}
+			}
+		}
+
+		if(fabs(bt1->coordinate.y-bt2->coordinate.y)==1&&bt1->coordinate.x-bt2->coordinate.x==0){
+			if(bt1->coordinate.y-bt2->coordinate.y==1){
+				if(bt1->dir==DIR_DOWN&&bt2->dir==DIR_UP){
+					ot=bt1;
+					break;
+				}
+			}else{
+				if(bt1->dir==DIR_UP&&bt2->dir==DIR_DOWN){
+					ot=bt1;
+					break;
+				}
+			}
+		}
+	}while(0);
+
+	return ot;
 }
 
 static object_type_t *barrier_on_bullet(object_type_t *barrier,object_type_t *bullet)
@@ -743,6 +797,22 @@ object_type_t *rotate_direction(dir_t direction,object_type_t *tank)
 	return tk;
 }
 
+static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle)
+{
+	object_type_t *tk=tank;
+	object_type_t *tb=tank_battle;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+
+	do{
+		if(NULL==tk||NULL==tb){
+			break;
+		}
+		
+	}while(0);
+	
+	return tmp;
+}
 static object_type_t *move_all_bullet(object_type_t *bullet)
 {
 	object_type_t *ot=bullet;
@@ -811,6 +881,14 @@ static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t 
 				cur=prev->next;
 				continue;
 			}
+
+			tmp=deal_bullet_to_bullet(cur,tb->bullet);
+			if(NULL!=tmp){
+				del_object_type(cur,bt);
+				cur=prev->next;
+				continue;
+			}
+			
 			
 			prev=cur;
 			cur=cur->next;
@@ -870,7 +948,33 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *t
 
 static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *all_bullet)
 {
-	return NULL;
+	object_type_t *bt=bullet;
+	object_type_t *abt=all_bullet;
+	object_type_t *prev=NULL;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+
+	do{
+		if(NULL==bt||NULL==abt){
+			break;
+		}
+		prev=abt;
+		cur=abt->next;
+		while(NULL!=cur){
+			if(bt!=cur){
+				tmp=bullet_on_bullet(bt,cur);
+				if(NULL!=tmp){
+					prev->next=cur->next;
+					del_object_type(cur,abt);
+					break;
+				}
+			}
+			prev=cur;
+			cur=cur->next;
+		}
+	}while(0);
+	
+	return tmp;
 }
 
 static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *barrier)
