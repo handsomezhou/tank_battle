@@ -50,7 +50,7 @@ void *input_tank_battle(void *arg)
 							case 'w':
 							case 'W':
 								if(DIR_UP==tk1->dir){
-									tk1->coordinate.y--;
+									move_tank(tk1);
 								}else{
 									rotate=can_rotate_direction(DIR_UP,tk1,tb);
 									if(TRUE==rotate){
@@ -62,7 +62,7 @@ void *input_tank_battle(void *arg)
 							case 'a':
 							case 'A':
 								if(DIR_LEFT==tk1->dir){
-									tk1->coordinate.x--;
+									move_tank(tk1);
 								}else{
 									rotate=can_rotate_direction(DIR_LEFT,tk1,tb);
 									if(TRUE==rotate){
@@ -74,7 +74,7 @@ void *input_tank_battle(void *arg)
 							case 's':
 							case 'S':
 								if(DIR_DOWN==tk1->dir){
-									tk1->coordinate.y++;
+									move_tank(tk1);
 								}else{
 									rotate=can_rotate_direction(DIR_DOWN,tk1,tb);
 									if(TRUE==rotate){
@@ -87,7 +87,7 @@ void *input_tank_battle(void *arg)
 							case 'd':
 							case 'D':
 								if(DIR_RIGHT==tk1->dir){
-									tk1->coordinate.x++;
+									move_tank(tk1);
 								}else{
 									rotate=can_rotate_direction(DIR_RIGHT,tk1,tb);
 									if(TRUE==rotate){

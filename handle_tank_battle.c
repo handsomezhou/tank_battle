@@ -29,17 +29,21 @@ static object_type_t *barrier_on_bullet(object_type_t *barrier,object_type_t *bu
 static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *barrier2);
 
 //tank:Moved after the first judgment
-static object_type_t *move_tank(object_type_t *tank);
 BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
 object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
+static tank_head_yx_t get_tank_head_yxoff(const object_type_t *tank);
+static BOOL get_tank_next_pos(object_type_t *next_pos,const object_type_t *tank);
 static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle);
-
+static object_type_t *deal_tank_to_bounds(object_type_t *tank);
+static object_type_t *deal_tank_to_tank(object_type_t *tank,object_type_t *head_tank);
+static object_type_t *deal_tank_to_bullet(object_type_t *tank,object_type_t *head_bullet);
+static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *head_barrier);
 //bullet:First move after the judge
 static object_type_t *move_all_bullet(object_type_t *bullet);
 static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle);
-static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *tank,tank_battle_t *tank_battle);
-static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *all_bullet);
-static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *barrier);
+static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *head_tank,tank_battle_t *tank_battle);
+static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *head_bullet);
+static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *head_barrier);
 
 int handle_tank_battle(tank_battle_t *tank_battle)
 {
@@ -159,6 +163,42 @@ object_type_t *fire(object_type_t *tank,object_type_t *bullet)
 	cur=add_object(coordinate,OBJECT_BULLET,dir,standpoint,0,bt);
 	
 	return cur;
+}
+
+object_type_t *move_tank(object_type_t *tank)
+{
+	object_type_t *tk=tank;
+	object_type_t *ot=NULL;
+	do{
+		if(NULL==tk){
+			break;
+		}
+
+		if(FALSE==tk->canmove){
+			break;
+		}
+
+		switch(tk->dir){
+			case DIR_UP:
+				tk->coordinate.y--;
+				break;
+			case DIR_RIGHT:
+				tk->coordinate.x++;
+				break;
+			case DIR_DOWN:
+				tk->coordinate.y++;
+				break;
+			case DIR_LEFT:
+				tk->coordinate.x--;
+				break;
+			default:
+				break;
+		}
+		
+		ot=tk;
+	}while(0);
+
+	return ot;
 }
 
 static BOOL new_tank_pos(coordinate_t *coordinate, dir_t *dir,const tank_battle_t *tank_battle)
@@ -342,7 +382,7 @@ static object_type_t *add_tank(coordinate_t coordinate,dir_t dir,standpoint_t st
 			cur->next->number=number;
 		}
 		
-		cur->next->canmove=TRUE;
+		cur->next->canmove=FALSE;
 		cur->next->next=NULL;
 
 		ot=cur->next;
@@ -705,42 +745,6 @@ static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *
 	return ot;
 }
 
-static object_type_t *move_tank(object_type_t *tank)
-{
-	object_type_t *tk=tank;
-	object_type_t *ot=NULL;
-	do{
-		if(NULL==tk){
-			break;
-		}
-
-		if(FALSE==tk->canmove){
-			break;
-		}
-
-		switch(tk->dir){
-			case DIR_UP:
-				tk->coordinate.y--;
-				break;
-			case DIR_RIGHT:
-				tk->coordinate.x++;
-				break;
-			case DIR_DOWN:
-				tk->coordinate.y++;
-				break;
-			case DIR_LEFT:
-				tk->coordinate.x--;
-				break;
-			default:
-				break;
-		}
-		
-		ot=tk;
-	}while(0);
-
-	return ot;
-}
-
 BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle)
 {
 	dir_t dir=direction;
@@ -794,22 +798,156 @@ object_type_t *rotate_direction(dir_t direction,object_type_t *tank)
 	return tk;
 }
 
+static tank_head_yx_t get_tank_head_yxoff(const object_type_t *tank)
+{
+	object_type_t *tk=tank;
+	tank_head_yx_t tank_head={.y_off=0,.x_off=0};
+
+	do{
+		if(NULL==tk){
+			break;
+		}
+
+		switch(tk->dir){
+			case DIR_UP:
+				tank_head.y_off = +0-1;
+				tank_head.x_off = +1;
+				break;
+				
+			case DIR_RIGHT:
+				tank_head.y_off = +1;
+				tank_head.x_off = +2+1;
+				break;
+				
+			case DIR_DOWN:
+				tank_head.y_off = +2+1;
+				tank_head.x_off = +1;
+				break;
+				
+			case DIR_LEFT:
+				tank_head.y_off = +1;
+				tank_head.x_off = +0-1;
+				break;
+		}
+	}while(0);
+
+	return tank_head;
+}
+
+
+static BOOL get_tank_next_pos(object_type_t *next_pos,const object_type_t *tank)
+{
+	const object_type_t *tk=tank;
+	object_type_t *np=next_pos;
+	BOOL flag=FALSE;
+	do{
+		if(NULL==tk||NULL==np){
+			break;
+		}
+		np->size.h=H_TANK;
+		np->size.w=W_TANK;
+		np->dir=tk->dir;
+		switch(tk->dir){
+			case DIR_UP:
+				np->coordinate.y=tk->coordinate.y-1;
+				np->coordinate.x=tk->coordinate.x;
+				break;
+
+			case DIR_RIGHT:
+				np->coordinate.y=tk->coordinate.y;
+				np->coordinate.x=tk->coordinate.x+1;
+				break;
+
+			case DIR_DOWN:
+				np->coordinate.y=tk->coordinate.y+1;
+				np->coordinate.x=tk->coordinate.x;
+				break;
+
+			case DIR_LEFT:
+				np->coordinate.y=tk->coordinate.y;
+				np->coordinate.x=tk->coordinate.x-1;
+		}
+	}while(0);
+
+	return flag;
+}
+
 static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle)
 {
 	object_type_t *tk=tank;
-	object_type_t *tb=tank_battle;
+	tank_battle_t *tb=tank_battle;
 	object_type_t *cur=NULL;
 	object_type_t *tmp=NULL;
-
 	do{
 		if(NULL==tk||NULL==tb){
 			break;
 		}
-		
+
+		cur=tk->next;
+		while(NULL!=cur){
+			tmp=deal_tank_to_bounds(cur);
+			if(NULL!=tmp){
+				//cur->canmove=FALSE;
+			}
+
+			//tmp=deal_tank_to_barrier(cur,tb->barrier);
+			cur=cur->next;
+		}
 	}while(0);
 	
 	return tmp;
 }
+
+static object_type_t *deal_tank_to_bounds(object_type_t *tank)
+{
+	object_type_t next_pos;
+	BOOL flag=FALSE;
+	
+	get_tank_next_pos(&next_pos,tank);
+	tank->canmove=TRUE;
+	flag=is_out_bounds(&next_pos);
+	if(flag==FALSE){
+		tank->canmove=FALSE;
+		return tank;
+	}else{
+		return NULL;
+	}
+}
+
+static object_type_t *deal_tank_to_tank(object_type_t *tank,object_type_t *head_tank)
+{
+	return NULL;
+}
+
+static object_type_t *deal_tank_to_bullet(object_type_t *tank,object_type_t *head_bullet)
+{
+	return NULL;
+}
+
+static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *head_barrier)
+{
+	object_type_t *tk=tank;
+	object_type_t *br=head_barrier;
+	object_type_t *cur=NULL;
+	tank_head_yx_t tank_head={.y_off=0,.x_off=0};
+
+	do{
+		if(NULL==tk||NULL==br){
+			break;
+		}
+		tank_head=get_tank_head_yxoff(tk);
+		tk->canmove=TRUE;
+		cur=br->next;
+		while(NULL!=cur){
+
+			cur=cur->next;
+		}
+		
+	}while(0);
+		
+	return NULL;
+}
+
 static object_type_t *move_all_bullet(object_type_t *bullet)
 {
 	object_type_t *ot=bullet;
@@ -886,7 +1024,6 @@ static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t 
 				continue;
 			}
 			
-			
 			prev=cur;
 			cur=cur->next;
 		}
@@ -895,11 +1032,11 @@ static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t 
 	return cur;
 }
 
-static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *tank,tank_battle_t *tank_battle)
+static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *head_tank,tank_battle_t *tank_battle)
 {
 	tank_battle_t *tb=tank_battle;
 	object_type_t *bt=bullet;
-	object_type_t *tk=tank;
+	object_type_t *tk=head_tank;
 	object_type_t *prev=NULL;
 	object_type_t *cur=NULL;
 	object_type_t *tmp=NULL;
@@ -943,10 +1080,10 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *t
 	return tmp;
 }
 
-static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *all_bullet)
+static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *head_bullet)
 {
 	object_type_t *bt=bullet;
-	object_type_t *abt=all_bullet;
+	object_type_t *abt=head_bullet;
 	object_type_t *prev=NULL;
 	object_type_t *cur=NULL;
 	object_type_t *tmp=NULL;
@@ -974,10 +1111,10 @@ static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t 
 	return tmp;
 }
 
-static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *barrier)
+static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *head_barrier)
 {
 	object_type_t *bt=bullet;
-	object_type_t *br=barrier;
+	object_type_t *br=head_barrier;
 	object_type_t *cur=NULL;
 
 	do{

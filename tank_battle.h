@@ -177,6 +177,7 @@ typedef struct tank_model{
 	int x_off;	
 }tank_model_t;		//The offset relative to the coordinate(y,x)
 
+typedef tank_model_t tank_head_yx_t;//The next coordinate offset of the tank head
 extern tank_model_t tk_model[TANK_MODEL_NUM][TANK_SPACE_NUM];
 
 /**

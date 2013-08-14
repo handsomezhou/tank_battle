@@ -51,5 +51,8 @@ object_type_t *add_object(coordinate_t coordinate,object_t object,dir_t dir,stan
  */
 object_type_t *fire(object_type_t *tank,object_type_t *bullet);
 
+object_type_t *move_tank(object_type_t *tank);
+
+
 #endif	/*HANDLE_TANK_BATTLE*/
 
