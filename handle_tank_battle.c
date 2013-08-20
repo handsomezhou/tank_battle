@@ -29,18 +29,30 @@ static object_type_t *barrier_on_bullet(object_type_t *barrier,object_type_t *bu
 static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *barrier2);
 
 //tank:Moved after the first judgment
-BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
-object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
+static object_type_t *deal_automatic_tank_collision(object_type_t *tank,tank_battle_t *tank_battle);
+static void deal_automatic_tank_motion(object_type_t *tank,tank_battle_t *tank_battle,BOOL random);
+object_type_t *deal_manual_tank_collision(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
 static tank_head_yx_t get_tank_head_yxoff(const object_type_t *tank);
 static BOOL get_tank_next_pos(object_type_t *next_pos,const object_type_t *tank);
-static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle);
+BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
+object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
+BOOL can_move_tank(object_type_t *tank,tank_battle_t *tank_battle);
+object_type_t *move_tank(object_type_t *tank);
+static BOOL is_fire(int speed);
+object_type_t *fire(object_type_t *tank,object_type_t *bullet);
+static BOOL is_change_direction(int seed);
+static dir_t random_direction(void);
+
+
 static object_type_t *deal_tank_to_bounds(object_type_t *tank);
 static object_type_t *deal_tank_to_tank(object_type_t *tank,object_type_t *head_tank);
 static object_type_t *deal_tank_to_bullet(object_type_t *tank,object_type_t *head_bullet);
 static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *head_barrier);
+static int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank);
+
 //bullet:First move after the judge
 static object_type_t *move_all_bullet(object_type_t *bullet);
-static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle);
+static object_type_t *deal_all_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle);
 static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *head_tank,tank_battle_t *tank_battle);
 static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *head_bullet);
 static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *head_barrier);
@@ -56,20 +68,21 @@ int handle_tank_battle(tank_battle_t *tank_battle)
 		if(NULL==tb->bullet||NULL==tb->tank){
 			break;
 		}
+#if 1
 		//deal bullet event
 		object_type_t *bt=NULL;
 		bt=move_all_bullet(tb->bullet);
 		if(NULL!=bt){
-			deal_bullet_collision(tb->bullet,tb);
+			deal_all_bullet_collision(tb->bullet,tb);
 		}else{//just for test
 			mvwprintw(stdscr,1,1,"%s","hihi");
 			wrefresh(stdscr);
 		}
+
+#endif
 		
 		//deal tank event
-		deal_tank_collision(tb->tank,tb);
-		
-		
+		deal_automatic_tank_collision(tb->tank,tb);
 		
 	}while(0);
 	return TB_FAILED;
@@ -125,82 +138,6 @@ object_type_t *add_object(coordinate_t coordinate,object_t object,dir_t dir,stan
 	return ret;
 }
 
-object_type_t *fire(object_type_t *tank,object_type_t *bullet)
-{
-	//get fire direction and coordinate
-	object_type_t *tk=tank;
-	object_type_t *bt=bullet;
-	object_type_t *cur=NULL;
-
-	coordinate_t coordinate;
-	dir_t dir=tk->dir;
-	standpoint_t standpoint=tk->standpoint;
-	if(NULL==tk||NULL==bt){
-		return cur;
-	}
-
-	switch(tk->dir){
-		//from the head of tank instead of the next pos of the head
-		case DIR_UP:
-			coordinate.y=tk->coordinate.y+0;
-			coordinate.x=tk->coordinate.x+1;
-			break;
-		case DIR_LEFT:
-			coordinate.y=tk->coordinate.y+1;
-			coordinate.x=tk->coordinate.x+0;
-			break;
-		case DIR_DOWN:
-			coordinate.y=tk->coordinate.y+2;
-			coordinate.x=tk->coordinate.x+1;
-			break;
-		case DIR_RIGHT:
-			coordinate.y=tk->coordinate.y+1;
-			coordinate.x=tk->coordinate.x+2;
-			break;
-		default:
-			break;
-	}
-	cur=add_object(coordinate,OBJECT_BULLET,dir,standpoint,0,bt);
-	
-	return cur;
-}
-
-object_type_t *move_tank(object_type_t *tank)
-{
-	object_type_t *tk=tank;
-	object_type_t *ot=NULL;
-	do{
-		if(NULL==tk){
-			break;
-		}
-
-		if(FALSE==tk->canmove){
-			break;
-		}
-
-		switch(tk->dir){
-			case DIR_UP:
-				tk->coordinate.y--;
-				break;
-			case DIR_RIGHT:
-				tk->coordinate.x++;
-				break;
-			case DIR_DOWN:
-				tk->coordinate.y++;
-				break;
-			case DIR_LEFT:
-				tk->coordinate.x--;
-				break;
-			default:
-				break;
-		}
-		
-		ot=tk;
-	}while(0);
-
-	return ot;
-}
-
 static BOOL new_tank_pos(coordinate_t *coordinate, dir_t *dir,const tank_battle_t *tank_battle)
 {
 	const tank_battle_t *tb=tank_battle;
@@ -229,12 +166,8 @@ static BOOL new_tank_pos(coordinate_t *coordinate, dir_t *dir,const tank_battle_
 		
 		tank.coordinate.y=rand()%(MAX_TANK_Y-MIN_TANK_Y+1)+MIN_TANK_Y;
 		tank.coordinate.x=rand()%(MAX_TANK_X-MIN_TANK_X+1)+MIN_TANK_X;
-		tank.dir=rand()%(DIR_NONE-DIR_UP);	//4-0
-#if 0
-		//just for test
-		tank.coordinate.y=8;
-		tank.coordinate.x=7;
-#endif
+		tank.dir=rand()%(TANK_MODEL_NUM);	//4-0
+		
 		cur_tk=tk->next;
 		while(NULL!=cur_tk){
 			tmp_tk=tank_on_tank(&tank,cur_tk);
@@ -745,62 +678,121 @@ static object_type_t *barrier_on_barrier(object_type_t *barrier1,object_type_t *
 	return ot;
 }
 
-BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle)
+
+
+static object_type_t *deal_automatic_tank_collision(object_type_t *tank,tank_battle_t *tank_battle)
 {
-	dir_t dir=direction;
 	object_type_t *tk=tank;
 	tank_battle_t *tb=tank_battle;
 	object_type_t *cur=NULL;
-	object_type_t *ret=NULL;
-	object_type_t tmp;
-	BOOL flag=FALSE;
+	object_type_t *tmp=NULL;
+	dir_t dir=DIR_NONE;
+	BOOL flag_change_dir=FALSE;
+	BOOL flag_rotate=FALSE;
+	BOOL flag_fire=FALSE;
+	
 	do{
 		if(NULL==tk||NULL==tb){
 			break;
 		}
 
-		if(NULL==tb->tank){
-			break;
-		}
-
-		if(dir==tk->dir){
-			break;
-		}
-		tmp.dir=dir;
-		coordinate_copy(&tmp.coordinate,&tk->coordinate);
-		size_copy(&tmp.size,&tk->size);
-		flag=TRUE;
-		cur=tb->tank->next;
+		cur=tk->next;
 		while(NULL!=cur){
-			if(tk!=cur){
-				ret=tank_on_tank(&tmp,cur);
-				if(NULL!=ret){
-					flag=FALSE;
-					break;
+			if(cur->number!=NUMBER_TANK_GREEN1&&\
+				cur->number!=NUMBER_TANK_GREEN2&&\
+				cur->number!=NUMBER_TANK_GREEN3){
+				
+				tmp=deal_tank_to_bounds(cur);
+				if(NULL!=tmp){
+					deal_automatic_tank_motion(cur,tb,FALSE);
+					cur=cur->next;
+					continue;
 				}
+				
+				tmp=deal_tank_to_barrier(cur,tb->barrier);
+				if(NULL!=tmp){
+					deal_automatic_tank_motion(cur,tb,TRUE);
+					cur=cur->next;
+					continue;
+				}
+
+				tmp=deal_tank_to_tank(cur,tb->tank);
+				if(NULL!=tmp){
+					deal_automatic_tank_motion(cur,tb,TRUE);
+					cur=cur->next;
+					continue;
+				}
+
+				tmp=deal_tank_to_bullet(cur,tb->bullet);
+				if(NULL!=tmp){
+					deal_automatic_tank_motion(cur,tb,TRUE);
+					cur=cur->next;
+					continue;
+				}
+				move_tank(cur);
+				deal_automatic_tank_motion(cur,tb,TRUE);
 			}
 			cur=cur->next;
 		}
 	}while(0);
-		
-	return flag;
+	
+	return tmp;
 }
 
-object_type_t *rotate_direction(dir_t direction,object_type_t *tank)
+
+static void deal_automatic_tank_motion(object_type_t *tank,tank_battle_t *tank_battle,BOOL random)
 {
 	object_type_t *tk=tank;
-	if(NULL==tk){
-		return tk;
+	tank_battle_t *tb=tank_battle;
+	dir_t dir=DIR_NONE;
+	BOOL flag_change_dir=FALSE;
+	BOOL flag_rotate=FALSE;
+	BOOL flag_fire=FALSE;
+	
+	flag_change_dir=is_change_direction(TANK_MODEL_NUM);
+	if((TRUE==flag_change_dir)||(random==FALSE)){
+		dir=random_direction();
+		flag_rotate=can_rotate_direction(dir,tk,tb);
+		if(TRUE==flag_rotate){
+			rotate_direction(dir,tk);
+		}
+	}
+	flag_fire=is_fire(tb->speed);
+	if(TRUE==flag_fire){
+		fire(tk,tb->bullet);
+	}
+}
+
+object_type_t *deal_manual_tank_collision(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle)
+{
+	dir_t dir=direction;
+	object_type_t *tk=tank;
+	tank_battle_t *tb=tank_battle;
+	BOOL rotate=FALSE;
+	
+	if(NULL==tk||NULL==tb){
+		return NULL;
+	}
+	
+	show_tank(1,1,tk);
+	can_move_tank(tk,tb);
+	show_tank(2,1,tk);
+	if(dir==tk->dir){
+		move_tank(tk);
+	}else{
+		rotate=can_rotate_direction(dir,tk,tb);
+		if(TRUE==rotate){
+			rotate_direction(dir,tk);
+		}
 	}
 
-	tk->dir=direction;
-
 	return tk;
+
 }
 
 static tank_head_yx_t get_tank_head_yxoff(const object_type_t *tank)
 {
-	object_type_t *tk=tank;
+	const object_type_t *tk=tank;
 	tank_head_yx_t tank_head={.y_off=0,.x_off=0};
 
 	do{
@@ -828,6 +820,8 @@ static tank_head_yx_t get_tank_head_yxoff(const object_type_t *tank)
 				tank_head.y_off = +1;
 				tank_head.x_off = +0-1;
 				break;
+			default:
+				break;
 		}
 	}while(0);
 
@@ -844,9 +838,7 @@ static BOOL get_tank_next_pos(object_type_t *next_pos,const object_type_t *tank)
 		if(NULL==tk||NULL==np){
 			break;
 		}
-		np->size.h=H_TANK;
-		np->size.w=W_TANK;
-		np->dir=tk->dir;
+		object_type_copy(np,tk);
 		switch(tk->dir){
 			case DIR_UP:
 				np->coordinate.y=tk->coordinate.y-1;
@@ -866,47 +858,230 @@ static BOOL get_tank_next_pos(object_type_t *next_pos,const object_type_t *tank)
 			case DIR_LEFT:
 				np->coordinate.y=tk->coordinate.y;
 				np->coordinate.x=tk->coordinate.x-1;
+				break;
+			default:break;
 		}
+		
 	}while(0);
 
 	return flag;
 }
 
-static object_type_t *deal_tank_collision(object_type_t *tank,tank_battle_t *tank_battle)
+BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle)
 {
+	dir_t dir=direction;
 	object_type_t *tk=tank;
 	tank_battle_t *tb=tank_battle;
 	object_type_t *cur=NULL;
-	object_type_t *tmp=NULL;
+	object_type_t *ret=NULL;
+	object_type_t tmp;
+	BOOL rotate=TRUE;
+	
 	do{
 		if(NULL==tk||NULL==tb){
 			break;
 		}
 
-		cur=tk->next;
-		while(NULL!=cur){
-			tmp=deal_tank_to_bounds(cur);
-			if(NULL!=tmp){
-				//cur->canmove=FALSE;
-			}
+		if(NULL==tb->tank){
+			break;
+		}
 
-			//tmp=deal_tank_to_barrier(cur,tb->barrier);
+		if(dir==tk->dir){
+			break;
+		}
+		tmp.dir=dir;
+		coordinate_copy(&tmp.coordinate,&tk->coordinate);
+		size_copy(&tmp.size,&tk->size);
+		cur=tb->tank->next;
+		while(NULL!=cur){
+			if(tk!=cur){
+				ret=tank_on_tank(&tmp,cur);
+				if(NULL!=ret){
+					rotate=FALSE;
+					break;
+				}
+				
+			}
 			cur=cur->next;
 		}
+		if(rotate==FALSE){
+			break;
+		}
+		
+		cur=tb->barrier->next;
+		while(NULL!=cur){
+			ret=barrier_on_tank(cur,&tmp);
+			if(NULL!=ret){
+				rotate=FALSE;
+				break;
+			}
+			cur=cur->next;
+		}
+		if(rotate==FALSE){
+			break;
+		}
+	}while(0);
+		
+	return rotate;
+}
+
+object_type_t *rotate_direction(dir_t direction,object_type_t *tank)
+{
+	object_type_t *tk=tank;
+	if(NULL==tk){
+		return tk;
+	}
+
+	tk->dir=direction;
+
+	return tk;
+}
+
+BOOL can_move_tank(object_type_t *tank,tank_battle_t *tank_battle)
+{
+	object_type_t *tk=tank;
+	tank_battle_t *tb=tank_battle;
+	object_type_t *tmp=NULL;
+	BOOL move=FALSE;
+	
+	do{
+		if(NULL==tk||NULL==tb){
+			break;
+		}
+
+		tmp=deal_tank_to_bounds(tk);
+		if(NULL!=tmp){
+			break;
+		}
+
+		tmp=deal_tank_to_tank(tk,tb->tank);
+		if(NULL!=tmp){
+			break;
+		}
+
+		tmp=deal_tank_to_barrier(tk,tb->barrier);
+		if(NULL!=tmp){
+			break;
+		}
+		
+		move=TRUE;
 	}while(0);
 	
-	return tmp;
+	return move;
+}
+
+object_type_t *move_tank(object_type_t *tank)
+{
+	object_type_t *tk=tank;
+	object_type_t *ot=NULL;
+	do{
+		if(NULL==tk){
+			break;
+		}
+
+		if(FALSE==tk->canmove){
+			break;
+		}
+
+		switch(tk->dir){
+			case DIR_UP:
+				tk->coordinate.y--;
+				break;
+			case DIR_RIGHT:
+				tk->coordinate.x++;
+				break;
+			case DIR_DOWN:
+				tk->coordinate.y++;
+				break;
+			case DIR_LEFT:
+				tk->coordinate.x--;
+				break;
+			default:
+				break;
+		}
+		
+		ot=tk;
+	}while(0);
+
+	return ot;
+}
+
+static BOOL is_fire(int speed)
+{
+	int sd=speed;
+	if(sd<SPEED_MIN_LEVEL||sd>SPEED_MAX_LEVEL){
+		sd=TANK_MODEL_NUM;
+	}
+
+	return (rand()%TANK_MODEL_NUM==TANK_MODEL_NUM/2)?TRUE:FALSE;
+}
+
+object_type_t *fire(object_type_t *tank,object_type_t *bullet)
+{
+	//get fire direction and coordinate
+	object_type_t *tk=tank;
+	object_type_t *bt=bullet;
+	object_type_t *cur=NULL;
+
+	coordinate_t coordinate;
+	dir_t dir=tk->dir;
+	standpoint_t standpoint=tk->standpoint;
+	if(NULL==tk||NULL==bt){
+		return cur;
+	}
+
+	switch(tk->dir){
+		//from the head of tank instead of the next pos of the head
+		case DIR_UP:
+			coordinate.y=tk->coordinate.y+0;
+			coordinate.x=tk->coordinate.x+1;
+			break;
+		case DIR_LEFT:
+			coordinate.y=tk->coordinate.y+1;
+			coordinate.x=tk->coordinate.x+0;
+			break;
+		case DIR_DOWN:
+			coordinate.y=tk->coordinate.y+2;
+			coordinate.x=tk->coordinate.x+1;
+			break;
+		case DIR_RIGHT:
+			coordinate.y=tk->coordinate.y+1;
+			coordinate.x=tk->coordinate.x+2;
+			break;
+		default:
+			break;
+	}
+	cur=add_object(coordinate,OBJECT_BULLET,dir,standpoint,0,bt);
+	
+	return cur;
+}
+
+static BOOL is_change_direction(int seed)
+{
+	int sd=seed;
+	if(sd<0){
+		sd=TANK_MODEL_NUM;
+	}
+
+	return ((rand()%sd==sd/2)?TRUE:FALSE);
+}
+
+static dir_t random_direction(void)
+{
+	dir_t dir=rand()%(TANK_MODEL_NUM);
+
+	return dir;
 }
 
 static object_type_t *deal_tank_to_bounds(object_type_t *tank)
 {
-	object_type_t next_pos;
+	object_type_t next_tank;
 	BOOL flag=FALSE;
 	
-	get_tank_next_pos(&next_pos,tank);
+	get_tank_next_pos(&next_tank,tank);
 	tank->canmove=TRUE;
-	flag=is_out_bounds(&next_pos);
-	if(flag==FALSE){
+	flag=is_out_bounds(&next_tank);
+	if(flag==TRUE){
 		tank->canmove=FALSE;
 		return tank;
 	}else{
@@ -916,36 +1091,108 @@ static object_type_t *deal_tank_to_bounds(object_type_t *tank)
 
 static object_type_t *deal_tank_to_tank(object_type_t *tank,object_type_t *head_tank)
 {
-	return NULL;
+	object_type_t *tk=tank;
+	object_type_t *htk=head_tank;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+	object_type_t next_tank;
+
+	do{
+		if(NULL==tk||NULL==htk){
+			break;
+		}
+
+		get_tank_next_pos(&next_tank,tk);
+		tk->canmove=TRUE;
+		cur=htk->next;
+		while(NULL!=cur){
+			if(tk!=cur){
+				tmp=tank_on_tank(&next_tank,cur);
+				if(NULL!=tmp){
+					tk->canmove=FALSE;
+					break;
+				}
+			}
+			cur=cur->next;
+		}
+	}while(0);
+
+	return tmp;
 }
 
 static object_type_t *deal_tank_to_bullet(object_type_t *tank,object_type_t *head_bullet)
 {
-	return NULL;
+	object_type_t *tk=tank;
+	object_type_t *hbt=head_bullet;
+	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
+	object_type_t next_tank;
+	do{
+		if(NULL==tk||NULL==hbt){
+			break;
+		}
+		get_tank_next_pos(&next_tank,tk);
+		tk->canmove=TRUE;
+		cur=hbt->next;
+		while(NULL!=cur){
+			tmp=bullet_on_tank(cur,&next_tank);
+			if(NULL!=tmp){
+				tk->canmove=FALSE;
+				break;
+			}
+			cur=cur->next;
+		}
+	}while(0);
+	
+	return tmp;
 }
 
 static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *head_barrier)
 {
 	object_type_t *tk=tank;
-	object_type_t *br=head_barrier;
+	object_type_t *hbr=head_barrier;
 	object_type_t *cur=NULL;
-	tank_head_yx_t tank_head={.y_off=0,.x_off=0};
+	object_type_t *tmp=NULL;
+	object_type_t next_tank;
 
 	do{
-		if(NULL==tk||NULL==br){
+		if(NULL==tk||NULL==hbr){
 			break;
 		}
-		tank_head=get_tank_head_yxoff(tk);
+		get_tank_next_pos(&next_tank,tk);
 		tk->canmove=TRUE;
-		cur=br->next;
+		cur=hbr->next;
 		while(NULL!=cur){
-
+			tmp=barrier_on_tank(cur,&next_tank);
+			if(NULL!=tmp){
+				tk->canmove=FALSE;
+				break;
+			}
 			cur=cur->next;
 		}
 		
 	}while(0);
 		
-	return NULL;
+	return tmp;
+}
+
+static int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank)
+{
+	const object_type_t *htk=head_tank;
+	object_type_t *cur=NULL;
+	int number=0;
+	if(NULL==htk){
+		return TB_FAILED;
+	}
+	cur=htk->next;
+	while(NULL!=cur){
+		if(standpoint==cur->standpoint){
+			number++;
+		}
+		cur=cur->next;
+	}
+	
+	return number;
 }
 
 static object_type_t *move_all_bullet(object_type_t *bullet)
@@ -979,7 +1226,7 @@ static object_type_t *move_all_bullet(object_type_t *bullet)
 	return ot->next;
 }
 
-static object_type_t *deal_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle)
+static object_type_t *deal_all_bullet_collision(object_type_t *bullet,tank_battle_t *tank_battle)
 {
 	object_type_t *bt=bullet;
 	tank_battle_t *tb=tank_battle;
@@ -1036,18 +1283,21 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *h
 {
 	tank_battle_t *tb=tank_battle;
 	object_type_t *bt=bullet;
-	object_type_t *tk=head_tank;
+	object_type_t *htk=head_tank;
 	object_type_t *prev=NULL;
 	object_type_t *cur=NULL;
 	object_type_t *tmp=NULL;
 	standpoint_t sp;
+	coordinate_t coordinate;
+	dir_t dir;
+	int number=0;
 
 	do{
-		if(NULL==bt||NULL==tk||NULL==tb){
+		if(NULL==bt||NULL==htk||NULL==tb){
 			break;
 		}
-		prev=tk;
-		cur=tk->next;
+		prev=htk;
+		cur=htk->next;
 		while(NULL!=cur){
 			tmp=bullet_on_tank(bt,cur);
 			if(NULL!=tmp){
@@ -1056,16 +1306,28 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *h
 					if(cur->hp<=0){
 						prev->next=cur->next;
 						sp=cur->standpoint;
-						del_object_type(cur,tk);
+						del_object_type(cur,htk);
 						if(STANDPOINT_BLUE==sp){
 							tb->side_blue--;
 							if(tb->side_blue<=0){
 								tb->status=STATUS_QUIT;
+							}else{
+								number=get_tank_num(STANDPOINT_BLUE,htk);
+								if(number<BLUE_MIN_FIGHTING_TANK&&tb->side_blue>=BLUE_MIN_FIGHTING_TANK){
+									new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,0,tb->tank);
+								}
 							}
 						}else if(STANDPOINT_GREEN==sp){
 							tb->side_green--;
 							if(tb->side_green<=0){
 								tb->status=STATUS_QUIT;
+							}else{
+								number=get_tank_num(STANDPOINT_GREEN,htk);
+								if(number<GREEN_MIN_FIGHTING_TANK&&tb->side_green>=GREEN_MIN_FIGHTING_TANK){
+									new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,0,tb->tank);
+								}
 							}
 						}
 					}	
@@ -1083,23 +1345,23 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *h
 static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t *head_bullet)
 {
 	object_type_t *bt=bullet;
-	object_type_t *abt=head_bullet;
+	object_type_t *hbt=head_bullet;
 	object_type_t *prev=NULL;
 	object_type_t *cur=NULL;
 	object_type_t *tmp=NULL;
 
 	do{
-		if(NULL==bt||NULL==abt){
+		if(NULL==bt||NULL==hbt){
 			break;
 		}
-		prev=abt;
-		cur=abt->next;
+		prev=hbt;
+		cur=hbt->next;
 		while(NULL!=cur){
 			if(bt!=cur){
 				tmp=bullet_on_bullet(bt,cur);
 				if(NULL!=tmp){
 					prev->next=cur->next;
-					del_object_type(cur,abt);
+					del_object_type(cur,hbt);
 					break;
 				}
 			}
@@ -1114,23 +1376,33 @@ static object_type_t *deal_bullet_to_bullet(object_type_t *bullet,object_type_t 
 static object_type_t *deal_bullet_to_barrier(object_type_t *bullet,object_type_t *head_barrier)
 {
 	object_type_t *bt=bullet;
-	object_type_t *br=head_barrier;
+	object_type_t *hbr=head_barrier;
+	object_type_t *prev=NULL;
 	object_type_t *cur=NULL;
+	object_type_t *tmp=NULL;
 
 	do{
-		if(NULL==bt||NULL==br){
+		if(NULL==bt||NULL==hbr){
 			break;
 		}
-		cur=br->next;
+		prev=hbr;
+		cur=hbr->next;
 		while(NULL!=cur){
 			if(bt->coordinate.y==cur->coordinate.y&&bt->coordinate.x==cur->coordinate.x){
-				cur=bt;
+				tmp=bt;
+
+				cur->hp--;
+				if(cur->hp<=0){
+					prev->next=cur->next;
+					del_object_type(cur,hbr);
+				}
 				break;
 			}
+			prev=cur;
 			cur=cur->next;
 		}
 	}while(0);
 	
-	return cur;
+	return tmp;
 }
 

@@ -59,9 +59,9 @@ int init_tank_battle(tank_battle_t **tank_battle)
 			(*tb)->manual_tank[i]=FALSE;
 		}
 		
-		(*tb)->side_blue=TANK_BLUE_NUM;
-		(*tb)->side_green=TANK_GREEN_NUM;
-		(*tb)->speed=SPEED_DELAY_TIME;
+		(*tb)->side_blue=BLUE_TANK_NUM;
+		(*tb)->side_green=GREEN_TANK_NUM;
+		(*tb)->speed=SPEED_MIN_LEVEL;
 		(*tb)->status=STATUS_INIT;
 		init_object_type(&(*tb)->tank,OBJECT_TANK);
 		init_object_type(&(*tb)->bullet,OBJECT_BULLET);
@@ -74,94 +74,29 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		//just for test
 		//1<=x<<TANK_DECK_WIDTH-3, 1<=TANK_DECK_HEIGHT-4
 
-		coordinate_t coordinate={.y=1+1,.x=1+1};
-#if 0
-
-		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
-
-		coordinate.y=TANK_DECK_HEIGHT-3-1;
-		coordinate.x=1;
-		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_BLUE,(*tb)->tank);
-
-		coordinate.y=1;
-		coordinate.x=TANK_DECK_WIDTH-3-1;
-		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
-
-
-		coordinate.y=TANK_DECK_HEIGHT-3-1;
-		coordinate.x=TANK_DECK_WIDTH-3-1;
-		add_object(coordinate,OBJECT_TANK,DIR_UP,STANDPOINT_GREEN,(*tb)->tank);
-#endif
-		int number=0;
-		coordinate.y=1;
-		coordinate.x=1;
-		add_object(coordinate,OBJECT_BULLET,DIR_RIGHT,STANDPOINT_BLUE,number,(*tb)->bullet);
-		coordinate.y=1;
-		coordinate.x=8;
-		add_object(coordinate,OBJECT_BULLET,DIR_DOWN,STANDPOINT_BLUE,number,(*tb)->bullet);
-		coordinate.y=TANK_DECK_HEIGHT-2;
-		coordinate.x=1;
-		add_object(coordinate,OBJECT_BULLET,DIR_RIGHT,STANDPOINT_BLUE,number,(*tb)->bullet);
-		coordinate.y=9;
-		coordinate.x=8;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_GREEN,number,(*tb)->bullet);
-		coordinate.y=8;
-		coordinate.x=8;
-		add_object(coordinate,OBJECT_BULLET,DIR_LEFT,STANDPOINT_GREEN,number,(*tb)->bullet);
-		coordinate.y=TANK_DECK_HEIGHT-2;
-		coordinate.x=TANK_DECK_WIDTH-2;
-		add_object(coordinate,OBJECT_BULLET,DIR_UP,STANDPOINT_BLUE,number,(*tb)->bullet);
-#if 0
-		coordinate.y=2;
-		coordinate.x=2;
-		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-
-		coordinate.y=2;
-		coordinate.x=TANK_DECK_WIDTH-2-1;
-		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-
-		coordinate.y=TANK_DECK_HEIGHT-2-1;
-		coordinate.x=2;
-		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-
-		coordinate.y=TANK_DECK_HEIGHT-2-1;
-		coordinate.x=TANK_DECK_WIDTH-2-1;
-		add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-#endif
+		
 #if 1
 		int n;
+		int number;
 		dir_t dir;
-#if 0
-		coordinate.y=8;
-		coordinate.x=8;
-	    add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-		coordinate.y=8;
-		coordinate.x=9;
-        add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-	 	coordinate.y=9;
-		coordinate.x=8;
-		 add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,(*tb)->barrier);
-#endif
-		n=10;
+		coordinate_t coordinate={.y=1+1,.x=1+1};
+		n=(rand()%(SPEED_MAX_LEVEL)+1)*2;
 		while(n--){
 			 new_object_pos(&coordinate,NULL,OBJECT_BARRIER,*tb);
 			 add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,number,(*tb)->barrier);
-			 //add_barrier(coordinate,tb->barrier);
 		}
-		n=5;
+		
+		n=BLUE_MIN_FIGHTING_TANK;
+		//(*tb)->side_blue=(*tb)->side_blue+n;
 		while(n){
 			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
 			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,number,(*tb)->tank);
 			n--;
 		}
-		n=5;
-		while(n){
-			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
-			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,number,(*tb)->tank);
-			n--;
-		}
-		n=6;
-		number=0;
+		
+		n=GREEN_MIN_FIGHTING_TANK;
+		number=-2;
+		//(*tb)->side_green=(*tb)->side_green+n;
 		while(n){
 			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
 			add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,--number,(*tb)->tank);
@@ -234,8 +169,8 @@ static int init_screen(screen_t *screen)
 		init_pair(COLOR_TANK_GREEN3,COLOR_WHITE,COLOR_BLACK);
 		
 		
-		init_pair(COLOR_BULLET_BLUE,COLOR_BLUE,COLOR_BLACK);
-		init_pair(COLOR_BULLET_GREEN,COLOR_GREEN,COLOR_BLACK);
+		init_pair(COLOR_BULLET_BLUE,COLOR_RED,COLOR_BLACK);
+		init_pair(COLOR_BULLET_GREEN,COLOR_RED,COLOR_BLACK);
 		init_pair(COLOR_BULLET_GREEN1,COLOR_YELLOW,COLOR_BLACK);
 		init_pair(COLOR_BULLET_GREEN2,COLOR_MAGENTA,COLOR_BLACK);
 		init_pair(COLOR_BULLET_GREEN3,COLOR_WHITE,COLOR_BLACK);
@@ -357,3 +292,21 @@ siz_t *size_copy(siz_t *dest,const siz_t *src)
 	return dest;
 }
 
+object_type_t *object_type_copy(object_type_t *dest,const object_type_t *src)
+{
+	if(NULL==dest||NULL==src){
+		return NULL;
+	}
+
+	dest->object=src->object;
+	coordinate_copy(&dest->coordinate,&src->coordinate);
+	size_copy(&dest->size,&src->size);
+	dest->dir=src->dir;
+	dest->standpoint=src->standpoint;
+	dest->hp=src->hp;
+	dest->number=src->number;
+	dest->canmove=src->canmove;
+	dest->next=src->next;
+	
+	return dest;
+}

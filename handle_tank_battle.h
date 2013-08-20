@@ -41,6 +41,12 @@ BOOL new_object_pos(coordinate_t *coordinate, dir_t *dir,object_t object,const t
  */
 object_type_t *add_object(coordinate_t coordinate,object_t object,dir_t dir,standpoint_t standpoint,int number,object_type_t *object_type);
 
+extern object_type_t *deal_manual_tank_collision(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
+
+extern BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle_t *tank_battle);
+extern object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
+extern BOOL can_move_tank(object_type_t *tank,tank_battle_t *tank_battle);
+extern object_type_t *move_tank(object_type_t *tank);
 /**
  *@brief Tank fire
  *@param [in] tank:Tank fire
@@ -49,9 +55,8 @@ object_type_t *add_object(coordinate_t coordinate,object_t object,dir_t dir,stan
  *@author handsomezhou  
  *@date 2013-08-12
  */
-object_type_t *fire(object_type_t *tank,object_type_t *bullet);
+extern object_type_t *fire(object_type_t *tank,object_type_t *bullet);
 
-object_type_t *move_tank(object_type_t *tank);
 
 
 #endif	/*HANDLE_TANK_BATTLE*/

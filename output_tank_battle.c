@@ -238,7 +238,6 @@ static void draw_tank(object_type_t *tank,const screen_t *screen)
 	int y=0;
 	int z=0;
 	object_type_t *cur=ot->next;
-	int number=0;
 	while(NULL!=cur){
 		open_colors(cur->object,cur->standpoint,cur->number);
 		for(y=scr->begin_y+cur->coordinate.y; y<scr->begin_y+cur->coordinate.y+cur->size.h; y++){

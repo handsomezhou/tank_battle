@@ -6,6 +6,17 @@
 #include "input_tank_battle.h"
 #include "handle_tank_battle.h"
 
+
+// just for test 
+void show_tank(int y, int x, const object_type_t *tank);
+void show_tank(int y, int x, const object_type_t *tank)
+{
+	const object_type_t *tk=tank;
+	mvwprintw(stdscr,y,x,"(%d,%d)(dir:%d)=%d=(cm:%d)=%p=%p",tk->coordinate.y,\
+		tk->coordinate.x,tk->dir,tk->number,tk->canmove,tk,tk->next);
+	wrefresh(stdscr);
+}
+
 void *input_tank_battle(void *arg)
 {
 	tank_battle_t *tb=(tank_battle_t *)arg;
@@ -44,57 +55,24 @@ void *input_tank_battle(void *arg)
 							cur=cur->next;
 						}
 					}
-
+					
 					if(tb->manual_tank[0]==TRUE){
 						switch(ch){
 							case 'w':
 							case 'W':
-								if(DIR_UP==tk1->dir){
-									move_tank(tk1);
-								}else{
-									rotate=can_rotate_direction(DIR_UP,tk1,tb);
-									if(TRUE==rotate){
-										rotate_direction(DIR_UP,tk1);
-										tk1->canmove=TRUE;
-									}
-								}
+								deal_manual_tank_collision(DIR_UP,tk1,tb);
 								break;
 							case 'a':
 							case 'A':
-								if(DIR_LEFT==tk1->dir){
-									move_tank(tk1);
-								}else{
-									rotate=can_rotate_direction(DIR_LEFT,tk1,tb);
-									if(TRUE==rotate){
-										rotate_direction(DIR_LEFT,tk1);
-										tk1->canmove=TRUE;
-									}
-								}
+								deal_manual_tank_collision(DIR_LEFT,tk1,tb);
 								break;
 							case 's':
 							case 'S':
-								if(DIR_DOWN==tk1->dir){
-									move_tank(tk1);
-								}else{
-									rotate=can_rotate_direction(DIR_DOWN,tk1,tb);
-									if(TRUE==rotate){
-										rotate_direction(DIR_DOWN,tk1);
-										tk1->canmove=TRUE;
-									}
-								}
-								
+								deal_manual_tank_collision(DIR_DOWN,tk1,tb);
 								break;
 							case 'd':
 							case 'D':
-								if(DIR_RIGHT==tk1->dir){
-									move_tank(tk1);
-								}else{
-									rotate=can_rotate_direction(DIR_RIGHT,tk1,tb);
-									if(TRUE==rotate){
-										rotate_direction(DIR_RIGHT,tk1);
-										tk1->canmove=TRUE;
-									}
-								}
+								deal_manual_tank_collision(DIR_RIGHT,tk1,tb);
 								break;
 							case 'e':
 							case 'E':
@@ -132,19 +110,19 @@ void *input_tank_battle(void *arg)
 						switch(ch){
 							case 'i':
 							case 'I':
-								tk2->coordinate.y--;
+								deal_manual_tank_collision(DIR_UP,tk2,tb);
 								break;
 							case 'j':
 							case 'J':
-								tk2->coordinate.x--;
+								deal_manual_tank_collision(DIR_LEFT,tk2,tb);
 								break;
 							case 'k':
 							case 'K':
-								tk2->coordinate.y++;
+								deal_manual_tank_collision(DIR_DOWN,tk2,tb);
 								break;
 							case 'l':
 							case 'L':
-								tk2->coordinate.x++;
+								deal_manual_tank_collision(DIR_RIGHT,tk2,tb);
 								break;
 							case 'u':
 							case 'U':
@@ -176,16 +154,16 @@ void *input_tank_battle(void *arg)
 					if(tb->manual_tank[2]==TRUE){
 						switch(ch){
 							case KEY_UP:
-								tk3->coordinate.y--;
+								deal_manual_tank_collision(DIR_UP,tk3,tb);
 								break;
 							case KEY_LEFT:
-								tk3->coordinate.x--;
+								deal_manual_tank_collision(DIR_LEFT,tk3,tb);
 								break;
 							case KEY_DOWN:
-								tk3->coordinate.y++;
+								deal_manual_tank_collision(DIR_DOWN,tk3,tb);
 								break;
 							case KEY_RIGHT:
-								tk3->coordinate.x++;
+								deal_manual_tank_collision(DIR_RIGHT,tk3,tb);
 								break;
 							case ' ':
 								if(STATUS_PAUSE!=tb->status){
@@ -196,10 +174,38 @@ void *input_tank_battle(void *arg)
 					}
 					break;
 
-				case 'p':
+				case 'p'://pause
 				case 'P':
+					if(tb->status!=STATUS_PAUSE){
+						tb->status=STATUS_PAUSE;
+					}else{
+						tb->status=STATUS_START;
+					}
 					break;
-					
+				
+				case '+'://speed up
+					if(tb->speed<SPEED_MAX_LEVEL){
+						tb->speed++;
+					}else{
+						tb->speed=SPEED_MAX_LEVEL;
+					}
+					break;
+				case '-'://slow down
+					if(tb->speed>SPEED_MIN_LEVEL){
+						tb->speed--;
+					}else{
+						tb->speed=SPEED_MIN_LEVEL;
+					}
+					break;
+
+				case 'G'://add green manual tank
+					break;
+				case 'g'://and green automatic tank
+					break;
+				case 'B'://add blue manual tank
+					break;
+				case 'b'://add blue automatic tank
+					break;
 				case 'q':
 				case 'Q':
 				case KEY_ESC:
@@ -209,7 +215,7 @@ void *input_tank_battle(void *arg)
 					break;
 			}
 		}
-		usleep(tb->speed);
+		usleep(SPEED_DELAY_TIME);
 	}
 	return tb;
 }

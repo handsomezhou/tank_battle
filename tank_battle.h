@@ -22,11 +22,18 @@
 #define TANK_MODEL_NUM	4
 #define TANK_SPACE_NUM	3
 
-#define TANK_BLUE_NUM	6
-#define TANK_GREEN_NUM	20
+#define BLUE_TANK_NUM	36
+#define BLUE_MIN_FIGHTING_TANK	6
+#define BLUE_MAX_FIGHTING_TANK	9
+#define BLUE_AUTO_TANK			3
+#define BLUE_MANUAL_TANK		3
 
-#define TANK_BLUE_FIGHTING	2
-#define TANK_GREEN_FIGHTING	5
+#define GREEN_TANK_NUM	36
+#define GREEN_MIN_FIGHTING_TANK	6
+#define GREEN_MAX_FIGHTING_TANK	9
+#define GREEN_AUTO_TANK			3
+#define GREEN_MANUAL_TANK		3
+
 
 #define H_TANK		3
 #define H_BULLET	1
@@ -69,7 +76,9 @@
 #define PAINT_BARRIER	'*'	
 
 #define MANUAL_TANK_NUM		3
-#define SPEED_DELAY_TIME (50*1000)	//500ms
+#define SPEED_DELAY_TIME (50*1000)	//50ms
+#define SPEED_MIN_LEVEL			1
+#define SPEED_MAX_LEVEL			20
 
 #define KEY_ESC  			27
 
@@ -168,7 +177,7 @@ typedef struct tank_battle{
 	BOOL manual_tank[MANUAL_TANK_NUM];//manual tank(which number is NUMBER_TANK_GREEN1 to NUMBER_TANK_GREEN3)
 	int side_blue;			//Blue side of tank number
 	int side_green;			//Green side of tank number
-	int speed;				//the move speed of the tank
+	int speed;				//the move speed of the tank()
 	status_t status;		//the status of tank battle
 }tank_battle_t;
 
@@ -202,7 +211,6 @@ void exit_tank_battle(tank_battle_t *tank_battle);
 //basic function
 coordinate_t *coordinate_copy(coordinate_t *dest,const coordinate_t *src);
 siz_t *size_copy(siz_t *dest,const siz_t *src);
-
-
+object_type_t *object_type_copy(object_type_t *dest,const object_type_t *src);
 #endif	/*TANK_BATTLE_H*/
 

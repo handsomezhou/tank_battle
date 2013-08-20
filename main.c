@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 {
 	tank_battle_t *tank_battle=NULL;
 	int ret=TB_FAILED;
+	int delay_time;
 	pthread_t tid_input=-1;
 	
 	srand((unsigned int)(time(NULL)));
@@ -34,9 +35,11 @@ int main(int argc, char *argv[])
 	
 	while(STATUS_QUIT!=tank_battle->status){
 		paint_tank_battle(tank_battle);
-		handle_tank_battle(tank_battle);
-		
-		usleep(1000*1000);
+		if(STATUS_PAUSE!=tank_battle->status){
+			handle_tank_battle(tank_battle);
+		}
+		delay_time=(SPEED_MAX_LEVEL-tank_battle->speed+1)*SPEED_DELAY_TIME;
+		usleep(delay_time);
 	}
 
 	if(pthread_join(tid_input,NULL)!=0){
