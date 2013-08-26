@@ -94,8 +94,9 @@ int init_tank_battle(tank_battle_t **tank_battle)
 			n--;
 		}
 		
-		n=GREEN_MIN_FIGHTING_TANK;
-		number=-2;
+		//n=GREEN_MIN_FIGHTING_TANK;
+		n=1;
+		number=0;
 		//(*tb)->side_green=(*tb)->side_green+n;
 		while(n){
 			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);

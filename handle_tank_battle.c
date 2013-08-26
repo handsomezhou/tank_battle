@@ -48,7 +48,7 @@ static object_type_t *deal_tank_to_bounds(object_type_t *tank);
 static object_type_t *deal_tank_to_tank(object_type_t *tank,object_type_t *head_tank);
 static object_type_t *deal_tank_to_bullet(object_type_t *tank,object_type_t *head_bullet);
 static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *head_barrier);
-static int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank);
+int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank);
 
 //bullet:First move after the judge
 static object_type_t *move_all_bullet(object_type_t *bullet);
@@ -309,10 +309,12 @@ static object_type_t *add_tank(coordinate_t coordinate,dir_t dir,standpoint_t st
 		cur->next->dir=dir;
 		cur->next->standpoint=standpoint;
 		cur->next->hp=HP_TANK;
-		if(number>=0||number<NUMBER_TANK_GREEN3){
+		if(number>=0||number<NUMBER_TANK3){
 			cur->next->number=NUMBER;
-		}else if(number>=NUMBER_TANK_GREEN3&&number<=NUMBER_TANK_GREEN1){
+		}else if(number==NUMBER_TANK3||number==NUMBER_TANK2||number==NUMBER_TANK1){
 			cur->next->number=number;
+		}else{
+			cur->next->number=NUMBER;
 		}
 		
 		cur->next->canmove=FALSE;
@@ -698,9 +700,9 @@ static object_type_t *deal_automatic_tank_collision(object_type_t *tank,tank_bat
 
 		cur=tk->next;
 		while(NULL!=cur){
-			if(cur->number!=NUMBER_TANK_GREEN1&&\
-				cur->number!=NUMBER_TANK_GREEN2&&\
-				cur->number!=NUMBER_TANK_GREEN3){
+			if(cur->number!=NUMBER_TANK1&&\
+				cur->number!=NUMBER_TANK2&&\
+				cur->number!=NUMBER_TANK3){
 				
 				tmp=deal_tank_to_bounds(cur);
 				if(NULL!=tmp){
@@ -1006,6 +1008,25 @@ object_type_t *move_tank(object_type_t *tank)
 	return ot;
 }
 
+int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank)
+{
+	const object_type_t *htk=head_tank;
+	object_type_t *cur=NULL;
+	int number=0;
+	if(NULL==htk){
+		return TB_FAILED;
+	}
+	cur=htk->next;
+	while(NULL!=cur){
+		if(standpoint==cur->standpoint){
+			number++;
+		}
+		cur=cur->next;
+	}
+	
+	return number;
+}
+
 static BOOL is_fire(int speed)
 {
 	int sd=speed;
@@ -1054,6 +1075,37 @@ object_type_t *fire(object_type_t *tank,object_type_t *bullet)
 	cur=add_object(coordinate,OBJECT_BULLET,dir,standpoint,0,bt);
 	
 	return cur;
+}
+
+int get_manual_tank_num(const object_type_t *head_tank)
+{
+	const object_type_t *htk=head_tank;
+	object_type_t *cur=NULL;
+	int number=0;
+	if(NULL==htk){
+		return TB_FAILED;
+	}
+	cur=htk->next;
+	while(NULL!=cur){
+		if(cur->number>=NUMBER_TANK3&&cur->number<=NUMBER_TANK1){
+			switch(cur->number){
+				case NUMBER_TANK1:
+					number += NUMBER_TANK1;
+					break;
+				case NUMBER_TANK2:
+					number += NUMBER_TANK2;
+					break;
+				case NUMBER_TANK3:
+					number += NUMBER_TANK3;
+					break;
+				default:
+					break;
+			}
+		}	
+		cur=cur->next;
+	}
+	
+	return number;
 }
 
 static BOOL is_change_direction(int seed)
@@ -1176,25 +1228,6 @@ static object_type_t *deal_tank_to_barrier(object_type_t *tank,object_type_t *he
 	return tmp;
 }
 
-static int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank)
-{
-	const object_type_t *htk=head_tank;
-	object_type_t *cur=NULL;
-	int number=0;
-	if(NULL==htk){
-		return TB_FAILED;
-	}
-	cur=htk->next;
-	while(NULL!=cur){
-		if(standpoint==cur->standpoint){
-			number++;
-		}
-		cur=cur->next;
-	}
-	
-	return number;
-}
-
 static object_type_t *move_all_bullet(object_type_t *bullet)
 {
 	object_type_t *ot=bullet;
@@ -1306,6 +1339,21 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *h
 					if(cur->hp<=0){
 						prev->next=cur->next;
 						sp=cur->standpoint;
+#if 0 //just for test
+						switch(cur->number){
+							case NUMBER_TANK1:
+								tb->manual_tank[(-NUMBER_TANK1)/2]=FALSE;
+								break;
+							case NUMBER_TANK2:
+								tb->manual_tank[(-NUMBER_TANK2)/2]=FALSE;
+								break;
+							case NUMBER_TANK3:
+								tb->manual_tank[(-NUMBER_TANK3)/2]=FALSE;
+								break;
+							default:
+								break;
+						}
+#endif
 						del_object_type(cur,htk);
 						if(STANDPOINT_BLUE==sp){
 							tb->side_blue--;

@@ -47,6 +47,7 @@ extern BOOL can_rotate_direction(dir_t direction,object_type_t *tank,tank_battle
 extern object_type_t *rotate_direction(dir_t direction,object_type_t *tank);
 extern BOOL can_move_tank(object_type_t *tank,tank_battle_t *tank_battle);
 extern object_type_t *move_tank(object_type_t *tank);
+extern int get_tank_num(standpoint_t standpoint,const object_type_t *head_tank);
 /**
  *@brief Tank fire
  *@param [in] tank:Tank fire
@@ -57,7 +58,7 @@ extern object_type_t *move_tank(object_type_t *tank);
  */
 extern object_type_t *fire(object_type_t *tank,object_type_t *bullet);
 
-
+int get_manual_tank_num(const object_type_t *head_tank);
 
 #endif	/*HANDLE_TANK_BATTLE*/
 

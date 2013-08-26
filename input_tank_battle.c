@@ -24,6 +24,10 @@ void *input_tank_battle(void *arg)
 		return tb;
 	}
 	int ch=-1;
+	int tank_num;
+	int manual_tank_num;
+	coordinate_t coordinate;
+	dir_t dir;
 	BOOL rotate=FALSE;
 	object_type_t *tk1=NULL;
 	object_type_t *tk2=NULL;
@@ -45,9 +49,10 @@ void *input_tank_battle(void *arg)
 				case 'e':
 				case 'E':
 					if(tb->manual_tank[0]==FALSE){
+						tk1=NULL;
 						cur=tb->tank->next;
 						while(NULL!=cur){
-							if(cur->number==NUMBER_TANK_GREEN1){
+							if(cur->number==NUMBER_TANK1){
 								tk1=cur;
 								tb->manual_tank[0]=TRUE;
 								break;
@@ -95,9 +100,10 @@ void *input_tank_battle(void *arg)
 				case 'u':
 				case 'U':
 					if(tb->manual_tank[1]==FALSE){
+						tk2=NULL;
 						cur=tb->tank->next;
 						while(NULL!=cur){
-							if(cur->number==NUMBER_TANK_GREEN2){
+							if(cur->number==NUMBER_TANK2){
 								tk2=cur;
 								tb->manual_tank[1]=TRUE;
 								break;
@@ -140,9 +146,10 @@ void *input_tank_battle(void *arg)
 				case KEY_RIGHT:
 				case ' ':
 					if(tb->manual_tank[2]==FALSE){
+						tk3=NULL;
 						cur=tb->tank->next;
 						while(NULL!=cur){
-							if(cur->number==NUMBER_TANK_GREEN3){
+							if(cur->number==NUMBER_TANK3){
 								tk3=cur;
 								tb->manual_tank[2]=TRUE;
 								break;
@@ -199,12 +206,39 @@ void *input_tank_battle(void *arg)
 					break;
 
 				case 'G'://add green manual tank
-					break;
+					//break;
 				case 'g'://and green automatic tank
+					tank_num=get_tank_num(STANDPOINT_GREEN,tb->tank);
+					if(tank_num<GREEN_MAX_FIGHTING_TANK&&tb->side_blue>=GREEN_MIN_FIGHTING_TANK){
+						if('g'==ch){
+							new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+							add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,0,tb->tank);
+						}else{
+							manual_tank_num=get_manual_tank_num(tb->tank);
+							if(manual_tank_num!=(NUMBER_TANK1+NUMBER_TANK2+NUMBER_TANK3)){
+								new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+								if((-manual_tank_num)&(-NUMBER_TANK1)==0){
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK1,tb->tank);
+								}else if((-manual_tank_num)&(-NUMBER_TANK2)==0){
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK2,tb->tank);
+								}else{
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK3,tb->tank);
+								}
+							}
+							
+						}
+						
+					}
+					
 					break;
 				case 'B'://add blue manual tank
-					break;
+					//break;
 				case 'b'://add blue automatic tank
+					tank_num=get_tank_num(STANDPOINT_BLUE,tb->tank);
+					if(tank_num<BLUE_MAX_FIGHTING_TANK&&tb->side_blue>=BLUE_MIN_FIGHTING_TANK){
+						new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+						add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,0,tb->tank);
+					}
 					break;
 				case 'q':
 				case 'Q':

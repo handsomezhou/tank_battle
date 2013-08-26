@@ -22,13 +22,13 @@
 #define TANK_MODEL_NUM	4
 #define TANK_SPACE_NUM	3
 
-#define BLUE_TANK_NUM	36
+#define BLUE_TANK_NUM	12//36
 #define BLUE_MIN_FIGHTING_TANK	6
 #define BLUE_MAX_FIGHTING_TANK	9
 #define BLUE_AUTO_TANK			3
 #define BLUE_MANUAL_TANK		3
 
-#define GREEN_TANK_NUM	36
+#define GREEN_TANK_NUM	12//36
 #define GREEN_MIN_FIGHTING_TANK	6
 #define GREEN_MAX_FIGHTING_TANK	9
 #define GREEN_AUTO_TANK			3
@@ -64,12 +64,12 @@
 #define MIN_BARRIER_Y	2
 #define MIN_BARRIER_X	2
 
-#define NUMBER_TANK_GREEN1		(-1)
-#define NUMBER_TANK_GREEN2		(-2)
-#define NUMBER_TANK_GREEN3		(-3)
-#define NUMBER_BULLTE_GREEN1	(-1)
-#define NUMBER_BULLTE_GREEN2	(-2)
-#define NUMBER_BULLTE_GREEN3	(-3)
+#define NUMBER_TANK1		(-1)
+#define NUMBER_TANK2		(-2)
+#define NUMBER_TANK3		(-4)
+#define NUMBER_BULLTE1		(-1)
+#define NUMBER_BULLTE2		(-2)
+#define NUMBER_BULLTE3		(-4)
 
 #define PAINT_TANK		'*'
 #define PAINT_BULLTE	'*'
