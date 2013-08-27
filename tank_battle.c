@@ -81,12 +81,14 @@ int init_tank_battle(tank_battle_t **tank_battle)
 		dir_t dir;
 		coordinate_t coordinate={.y=1+1,.x=1+1};
 		n=(rand()%(SPEED_MAX_LEVEL)+1)*2;
+		//just for test
+		n=1;
 		while(n--){
 			 new_object_pos(&coordinate,NULL,OBJECT_BARRIER,*tb);
 			 add_object(coordinate,OBJECT_BARRIER,DIR_NONE,STANDPOINT_WHITE,number,(*tb)->barrier);
 		}
 		
-		n=BLUE_MIN_FIGHTING_TANK;
+		n=BLUE_MIN_FIGHTING_TANK-3;
 		//(*tb)->side_blue=(*tb)->side_blue+n;
 		while(n){
 			new_object_pos(&coordinate,&dir,OBJECT_TANK,*tb);
@@ -165,18 +167,18 @@ static int init_screen(screen_t *screen)
 
 		init_pair(COLOR_TANK_BLUE,COLOR_BLUE,COLOR_BLACK);
 		init_pair(COLOR_TANK_GREEN,COLOR_GREEN,COLOR_BLACK);
-		init_pair(COLOR_TANK_GREEN1,COLOR_YELLOW,COLOR_BLACK);
-		init_pair(COLOR_TANK_GREEN2,COLOR_MAGENTA,COLOR_BLACK);
-		init_pair(COLOR_TANK_GREEN3,COLOR_WHITE,COLOR_BLACK);
+		init_pair(COLOR_TANK1,COLOR_YELLOW,COLOR_BLACK);
+		init_pair(COLOR_TANK2,COLOR_MAGENTA,COLOR_BLACK);
+		init_pair(COLOR_TANK3,COLOR_WHITE,COLOR_BLACK);
 		
 		
-		init_pair(COLOR_BULLET_BLUE,COLOR_RED,COLOR_BLACK);
-		init_pair(COLOR_BULLET_GREEN,COLOR_RED,COLOR_BLACK);
-		init_pair(COLOR_BULLET_GREEN1,COLOR_YELLOW,COLOR_BLACK);
-		init_pair(COLOR_BULLET_GREEN2,COLOR_MAGENTA,COLOR_BLACK);
-		init_pair(COLOR_BULLET_GREEN3,COLOR_WHITE,COLOR_BLACK);
+		init_pair(COLOR_BULLET_BLUE,COLOR_BLUE,COLOR_BLACK);
+		init_pair(COLOR_BULLET_GREEN,COLOR_GREEN,COLOR_BLACK);
+		init_pair(COLOR_BULLET1,COLOR_YELLOW,COLOR_BLACK);
+		init_pair(COLOR_BULLET2,COLOR_MAGENTA,COLOR_BLACK);
+		init_pair(COLOR_BULLET3,COLOR_WHITE,COLOR_BLACK);
 
-		init_pair(COLOR_BARRIER,COLOR_YELLOW,COLOR_BLACK);
+		init_pair(COLOR_BARRIER,COLOR_RED,COLOR_BLACK);
 
 		init_pair(COLOR_NORMAL_PROMPT,COLOR_GREEN,COLOR_BLACK);
 		init_pair(COLOR_ERROR_PROMPT,COLOR_RED,COLOR_WHITE);

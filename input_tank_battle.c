@@ -206,22 +206,23 @@ void *input_tank_battle(void *arg)
 					break;
 
 				case 'G'://add green manual tank
-					//break;
 				case 'g'://and green automatic tank
 					tank_num=get_tank_num(STANDPOINT_GREEN,tb->tank);
-					if(tank_num<GREEN_MAX_FIGHTING_TANK&&tb->side_blue>=GREEN_MIN_FIGHTING_TANK){
+					if(tank_num<GREEN_MAX_FIGHTING_TANK&&tb->side_green>=GREEN_MIN_FIGHTING_TANK){
 						if('g'==ch){
+							//tb->side_green--;
 							new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
 							add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,0,tb->tank);
 						}else{
 							manual_tank_num=get_manual_tank_num(tb->tank);
-							if(manual_tank_num!=(NUMBER_TANK1+NUMBER_TANK2+NUMBER_TANK3)){
+							if(manual_tank_num>(NUMBER_TANK1+NUMBER_TANK2+NUMBER_TANK3)){
+							//	tb->side_green--;
 								new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
-								if((-manual_tank_num)&(-NUMBER_TANK1)==0){
+								if(((-manual_tank_num)&(-NUMBER_TANK1))==0){
 									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK1,tb->tank);
-								}else if((-manual_tank_num)&(-NUMBER_TANK2)==0){
+								}else if(((-manual_tank_num)&(-NUMBER_TANK2))==0){
 									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK2,tb->tank);
-								}else{
+								}else if(((-manual_tank_num)&(-NUMBER_TANK3))==0){
 									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_GREEN,NUMBER_TANK3,tb->tank);
 								}
 							}
@@ -232,13 +233,31 @@ void *input_tank_battle(void *arg)
 					
 					break;
 				case 'B'://add blue manual tank
-					//break;
 				case 'b'://add blue automatic tank
 					tank_num=get_tank_num(STANDPOINT_BLUE,tb->tank);
 					if(tank_num<BLUE_MAX_FIGHTING_TANK&&tb->side_blue>=BLUE_MIN_FIGHTING_TANK){
-						new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
-						add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,0,tb->tank);
+						if('b'==ch){
+							//tb->side_blue--;
+							new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+							add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,0,tb->tank);
+						}else{
+							manual_tank_num=get_manual_tank_num(tb->tank);
+							if(manual_tank_num>(NUMBER_TANK1+NUMBER_TANK2+NUMBER_TANK3)){
+								//tb->side_blue--;
+								new_object_pos(&coordinate,&dir,OBJECT_TANK,tb);
+								if(((-manual_tank_num)&(-NUMBER_TANK1))==0){
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,NUMBER_TANK1,tb->tank);
+								}else if(((-manual_tank_num)&(-NUMBER_TANK2))==0){
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,NUMBER_TANK2,tb->tank);
+								}else if(((-manual_tank_num)&(-NUMBER_TANK3))==0){
+									add_object(coordinate,OBJECT_TANK,dir,STANDPOINT_BLUE,NUMBER_TANK3,tb->tank);
+								}
+							}
+							
+						}
+						
 					}
+					
 					break;
 				case 'q':
 				case 'Q':

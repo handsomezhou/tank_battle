@@ -51,18 +51,31 @@ static void open_colors(object_t object,standpoint_t standpoint,int number)
 		case OBJECT_TANK:
 			switch(standpoint){
 				case STANDPOINT_BLUE:
-					if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_BLUE)|A_BOLD);}
+					switch(number){
+						case NUMBER_TANK1:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK1)|A_BOLD);}
+							break;
+						case NUMBER_TANK2:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK2)|A_BOLD);}
+							break;
+						case NUMBER_TANK3:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_BLUE)|A_BOLD);}
+							break;
+					}
 					break;
 				case STANDPOINT_GREEN:
 					switch(number){
 						case NUMBER_TANK1:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN1)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK1)|A_BOLD);}
 							break;
 						case NUMBER_TANK2:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN2)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK2)|A_BOLD);}
 							break;
 						case NUMBER_TANK3:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN3)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK3)|A_BOLD);}
 							break;
 						default:
 							if(has_colors()){attron(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
@@ -82,13 +95,13 @@ static void open_colors(object_t object,standpoint_t standpoint,int number)
 				case STANDPOINT_GREEN:
 					switch(number){
 						case NUMBER_BULLTE1:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN1)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET1)|A_BOLD);}
 							break;
 						case NUMBER_BULLTE2:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN2)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET2)|A_BOLD);}
 							break;
 						case NUMBER_BULLTE3:
-							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN3)|A_BOLD);}
+							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET3)|A_BOLD);}
 							break;
 						default:
 							if(has_colors()){attron(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
@@ -122,18 +135,31 @@ static void close_colors(object_t object, standpoint_t standpoint,int number)
 		case OBJECT_TANK:
 			switch(standpoint){
 				case STANDPOINT_BLUE:
-					if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_BLUE)|A_BOLD);}
+					switch(number){
+						case NUMBER_TANK1:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK1)|A_BOLD);}
+							break;
+						case NUMBER_TANK2:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK2)|A_BOLD);}
+							break;
+						case NUMBER_TANK3:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK3)|A_BOLD);}
+							break;
+						default:
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
+							break;
+					}
 					break;
 				case STANDPOINT_GREEN:
 					switch(number){
 						case NUMBER_TANK1:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN1)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK1)|A_BOLD);}
 							break;
 						case NUMBER_TANK2:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN2)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK2)|A_BOLD);}
 							break;
 						case NUMBER_TANK3:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN3)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK3)|A_BOLD);}
 							break;
 						default:
 							if(has_colors()){attroff(COLOR_PAIR(COLOR_TANK_GREEN)|A_BOLD);}
@@ -153,16 +179,16 @@ static void close_colors(object_t object, standpoint_t standpoint,int number)
 				case STANDPOINT_GREEN:
 					switch(number){
 						case NUMBER_BULLTE1:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN1)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET1)|A_BOLD);}
 							break;
 						case NUMBER_BULLTE2:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN2)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET2)|A_BOLD);}
 							break;
 						case NUMBER_BULLTE3:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN3)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET3)|A_BOLD);}
 							break;
 						default:
-							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_GREEN)|A_BOLD);}
+							if(has_colors()){attroff(COLOR_PAIR(COLOR_BULLET_BLUE)|A_BOLD);}
 							break;
 						
 					}

@@ -1101,6 +1101,8 @@ int get_manual_tank_num(const object_type_t *head_tank)
 				default:
 					break;
 			}
+			//just for test
+			mvwprintw(stdscr,3,1,"%d",number);
 		}	
 		cur=cur->next;
 	}
@@ -1339,7 +1341,7 @@ static object_type_t *deal_bullet_to_tank(object_type_t *bullet,object_type_t *h
 					if(cur->hp<=0){
 						prev->next=cur->next;
 						sp=cur->standpoint;
-#if 0 //just for test
+#if 1 //just for test
 						switch(cur->number){
 							case NUMBER_TANK1:
 								tb->manual_tank[(-NUMBER_TANK1)/2]=FALSE;
